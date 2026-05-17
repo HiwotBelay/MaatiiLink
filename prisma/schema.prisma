@@ -1,0 +1,192 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  BRANCH_STAFF
+  BRANCH_MANAGER
+  SUPERVISOR
+  HO_ADMIN
+  AUDITOR
+}
+
+enum EodStatus {
+  DRAFT
+  SUBMITTED
+  LOCKED
+}
+
+enum IncidentSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum IncidentStatus {
+  OPEN
+  ESCALATED
+  RESOLVED
+  CLOSED
+}
+
+enum TicketCategory {
+  IT
+  FACILITIES
+  CASH_LOGISTICS
+  OTHER
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Branch {
+  id            String   @id @default(cuid())
+  name          String
+  branchCode    String   @unique
+  district      String?
+  region        String?
+  isSmartBranch Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  users              User[]
+  eodReports         EodReport[]
+  incidents          Incident[]
+  directiveAcks      DirectiveAcknowledgment[]
+  tickets            ServiceTicket[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String?
+  role         Role
+  branchId     String?
+  branch       Branch?  @relation(fields: [branchId], references: [id])
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  eodReportsSubmitted   EodReport[]                 @relation("EodSubmittedBy")
+  incidentsReported     Incident[]                  @relation("IncidentReporter")
+  directiveAcks         DirectiveAcknowledgment[]
+  ticketsCreated        ServiceTicket[]             @relation("TicketCreator")
+  ticketsAssigned       ServiceTicket[]             @relation("TicketAssignee")
+  directivesPublished   Directive[]                 @relation("DirectivePublisher")
+  auditLogs             AuditLog[]
+}
+
+model EodReport {
+  id              String    @id @default(cuid())
+  branchId        String
+  branch          Branch    @relation(fields: [branchId], references: [id])
+  reportDate      DateTime  @db.Date
+  status          EodStatus @default(DRAFT)
+  openingCashBand String?
+  closingCashBand String?
+  anomalyNotes    String?
+  complaintCount  Int       @default(0)
+  staffingNotes   String?
+  submittedById   String?
+  submittedBy     User?     @relation("EodSubmittedBy", fields: [submittedById], references: [id])
+  submittedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([branchId, reportDate])
+}
+
+model Incident {
+  id           String           @id @default(cuid())
+  branchId     String
+  branch       Branch           @relation(fields: [branchId], references: [id])
+  reporterId   String
+  reporter     User             @relation("IncidentReporter", fields: [reporterId], references: [id])
+  category     String
+  severity     IncidentSeverity
+  status       IncidentStatus   @default(OPEN)
+  title        String
+  description  String
+  resolvedAt   DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+model Directive {
+  id            String   @id @default(cuid())
+  title         String
+  body          String
+  isCritical    Boolean  @default(false)
+  publishedById String
+  publishedBy   User     @relation("DirectivePublisher", fields: [publishedById], references: [id])
+  publishedAt   DateTime @default(now())
+  deadlineAt    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  acknowledgments DirectiveAcknowledgment[]
+}
+
+model DirectiveAcknowledgment {
+  id          String    @id @default(cuid())
+  directiveId String
+  directive   Directive @relation(fields: [directiveId], references: [id], onDelete: Cascade)
+  branchId    String
+  branch      Branch    @relation(fields: [branchId], references: [id])
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  acknowledgedAt DateTime @default(now())
+  quizPassed  Boolean?
+
+  @@unique([directiveId, branchId])
+}
+
+model ServiceTicket {
+  id           String         @id @default(cuid())
+  branchId     String
+  branch       Branch         @relation(fields: [branchId], references: [id])
+  creatorId    String
+  creator      User           @relation("TicketCreator", fields: [creatorId], references: [id])
+  assigneeId   String?
+  assignee     User?          @relation("TicketAssignee", fields: [assigneeId], references: [id])
+  category     TicketCategory
+  priority     TicketPriority @default(MEDIUM)
+  status       TicketStatus   @default(OPEN)
+  title        String
+  description  String
+  resolvedAt   DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}

@@ -10,6 +10,7 @@ node_modules/
 
 # Build
 .next/
+tsconfig.tsbuildinfo
 out/
 dist/
 build/

@@ -13,10 +13,18 @@ Phase 0 — Foundation (do not skip Gate G0 before full product build).
 ## Local development
 
 ```bash
+npm install
 cp .env.example .env
-# Edit .env — set DATABASE_URL from Neon dashboard (pooled connection)
-# App setup instructions added in Phase 2
+# Edit .env — Neon DATABASE_URL (already set locally for Hiwot)
+
+npx prisma migrate dev    # first time: create tables on Neon
+npm run db:seed           # dev users + sample branches
+
+npm run dev               # http://localhost:3000
 ```
+
+- Health check: [http://localhost:3000/api/health](http://localhost:3000/api/health)
+- Prisma Studio: `npm run db:studio`
 
 **Database:** Neon PostgreSQL (see `docs/DATABASE.md`). Optional local Postgres: `docker compose up -d`.
 
