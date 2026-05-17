@@ -21,82 +21,96 @@ const loginSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    request.headers.get("x-real-ip") ??
-    "unknown";
-
-  if (!checkLoginRateLimit(ip)) {
-    return jsonError("Too many login attempts. Try again later.", 429);
-  }
-
-  let body: unknown;
   try {
-    body = await request.json();
-  } catch {
-    return jsonError("Invalid JSON body", 400);
-  }
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      request.headers.get("x-real-ip") ??
+      "unknown";
 
-  const parsed = loginSchema.safeParse(body);
-  if (!parsed.success) {
-    return jsonValidation(parsed.error);
-  }
+    if (!checkLoginRateLimit(ip)) {
+      return jsonError("Too many login attempts. Try again later.", 429);
+    }
 
-  const email = parsed.data.email.toLowerCase().trim();
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return jsonError("Invalid JSON body", 400);
+    }
 
-  const user = await prisma.user.findUnique({
-    where: { email },
-    include: { branch: { select: { name: true, branchCode: true } } },
-  });
+    const parsed = loginSchema.safeParse(body);
+    if (!parsed.success) {
+      return jsonValidation(parsed.error);
+    }
 
-  if (!user || !user.isActive) {
-    return jsonError("Invalid email or password", 401);
-  }
+    const email = parsed.data.email.toLowerCase().trim();
 
-  const valid = await verifyPassword(parsed.data.password, user.passwordHash);
-  if (!valid) {
-    return jsonError("Invalid email or password", 401);
-  }
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: { branch: { select: { name: true, branchCode: true } } },
+    });
 
-  resetLoginRateLimit(ip);
+    if (!user || !user.isActive) {
+      return jsonError("Invalid email or password", 401);
+    }
 
-  const token = await createSessionToken({
-    sub: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.role,
-    branchId: user.branchId,
-  });
+    const valid = await verifyPassword(parsed.data.password, user.passwordHash);
+    if (!valid) {
+      return jsonError("Invalid email or password", 401);
+    }
 
-  await writeAuditLog({
-    userId: user.id,
-    action: "LOGIN",
-    entityType: "User",
-    entityId: user.id,
-    metadata: { email: user.email, role: user.role },
-  });
+    resetLoginRateLimit(ip);
 
-  const response = jsonOk({
-    ok: true,
-    user: {
-      id: user.id,
-      name: user.name,
+    const token = await createSessionToken({
+      sub: user.id,
       email: user.email,
+      name: user.name,
       role: user.role,
-      branch: user.branch
-        ? { name: user.branch.name, branchCode: user.branch.branchCode }
-        : null,
-    },
-    redirectTo: defaultRouteForRole(user.role),
-  });
+      branchId: user.branchId,
+    });
 
-  response.cookies.set(sessionCookieOptions().name, token, {
-    httpOnly: sessionCookieOptions().httpOnly,
-    secure: sessionCookieOptions().secure,
-    sameSite: sessionCookieOptions().sameSite,
-    path: sessionCookieOptions().path,
-    maxAge: sessionCookieOptions().maxAge,
-  });
+    await writeAuditLog({
+      userId: user.id,
+      action: "LOGIN",
+      entityType: "User",
+      entityId: user.id,
+      metadata: { email: user.email, role: user.role },
+    });
 
-  return response;
+    const response = jsonOk({
+      ok: true,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        branch: user.branch
+          ? { name: user.branch.name, branchCode: user.branch.branchCode }
+          : null,
+      },
+      redirectTo: defaultRouteForRole(user.role),
+    });
+
+    response.cookies.set(sessionCookieOptions().name, token, {
+      httpOnly: sessionCookieOptions().httpOnly,
+      secure: sessionCookieOptions().secure,
+      sameSite: sessionCookieOptions().sameSite,
+      path: sessionCookieOptions().path,
+      maxAge: sessionCookieOptions().maxAge,
+    });
+
+    return response;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("[auth/login]", message);
+
+    if (message.includes("SESSION_SECRET")) {
+      return jsonError(
+        "Server is missing SESSION_SECRET (32+ characters in Vercel env).",
+        503,
+      );
+    }
+
+    return jsonError("Login failed. Please try again.", 500);
+  }
 }
