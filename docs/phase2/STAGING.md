@@ -2,6 +2,9 @@
 
 **Phase 2** | SABA CODERS
 
+> **Step-by-step G2 deploy:** see **[G2_DEPLOY_GUIDE.md](./G2_DEPLOY_GUIDE.md)**  
+> **Mentor sign-off pack:** see **[G2_MENTOR_SUBMISSION.md](./G2_MENTOR_SUBMISSION.md)**
+
 ---
 
 ## Purpose
@@ -25,7 +28,7 @@ Staging mirrors production for UAT before branch pilot. Uses **separate** databa
 | `SESSION_SECRET` | Random 32+ chars (unique per env) |
 | `NODE_ENV` | `production` |
 
-5. Staging URL example: `https://maatiilink-xxx.vercel.app`
+5. Staging URL: **https://maatii-link.vercel.app**
 
 ### Option B — VM at DX Valley
 
@@ -38,12 +41,13 @@ Staging mirrors production for UAT before branch pilot. Uses **separate** databa
 
 ## Staging checklist
 
-- [ ] `DATABASE_URL` is **not** the same as personal dev DB
-- [ ] `SESSION_SECRET` unique
-- [ ] `npm run build` succeeds on deploy
-- [ ] `/api/health` returns `ok: true`
-- [ ] Seed run once: `npm run db:seed` (staging only)
-- [ ] Dev passwords rotated or SSO before bank demo
+- [x] Neon branch / staging DB configured (pooled `DATABASE_URL` on Vercel)
+- [x] `prisma migrate deploy` + seed applied (health: 2 branches, 3 users)
+- [x] Vercel project live; env vars set (`DATABASE_URL`, `SESSION_SECRET`)
+- [x] Deployed from GitHub → Vercel
+- [x] `/api/health` returns `ok: true`, `database: connected`
+- [x] App home + `/login` reachable on staging
+- [ ] Mentor / IT formal sign-off (submit `G2_MENTOR_SUBMISSION.md` when ready)
 
 ---
 
@@ -51,17 +55,30 @@ Staging mirrors production for UAT before branch pilot. Uses **separate** databa
 
 | Field | Value |
 |-------|--------|
-| Staging URL | _Fill when deployed_ |
-| Deployed by | SABA CODERS |
-| Date | |
-| Approved | Team self-signoff for internship |
+| **Staging URL** | https://maatii-link.vercel.app |
+| **Health URL** | https://maatii-link.vercel.app/api/health |
+| **Login** | https://maatii-link.vercel.app/login |
+| **Hosting** | Vercel |
+| **Deployed by** | SABA CODERS |
+| **Date** | 2026-05-17 |
+| **Health verified** | `ok: true`, `database: connected` (2026-05-17) |
+| **Mentor / IT approved** | Pending — use `G2_MENTOR_SUBMISSION.md` |
 
 ---
 
-## Smoke test after deploy
+## Smoke test (verified)
 
 ```bash
-curl https://YOUR-STAGING-URL/api/health
+curl https://maatii-link.vercel.app/api/health
 ```
 
-Expected: `"ok": true`, `"database": "connected"`
+Response (2026-05-17):
+
+```json
+{
+  "ok": true,
+  "service": "MaatiiLink",
+  "database": "connected",
+  "stats": { "branches": 2, "users": 3 }
+}
+```

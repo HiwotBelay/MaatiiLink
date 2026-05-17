@@ -8,7 +8,15 @@ Built by **SABA CODERS** at COOP DX Valley.
 
 ## Status
 
-Phase 0 — Foundation (do not skip Gate G0 before full product build).
+| Phase | Status |
+|-------|--------|
+| Phase 0 — Foundation | Complete |
+| Phase 1 — Discovery | Complete |
+| Phase 2 — Architecture & infra | **Complete** (Gate G2 staging live) |
+| Sprint 1 — Auth | Complete |
+| Sprint 2 — EOD | Complete |
+
+**Staging:** https://maatii-link.vercel.app · [Health](https://maatii-link.vercel.app/api/health) · [Login](https://maatii-link.vercel.app/login)
 
 ## Local development
 

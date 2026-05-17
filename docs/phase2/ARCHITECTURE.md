@@ -82,7 +82,7 @@ flowchart LR
 | Environment | URL pattern | Database |
 |-------------|-------------|----------|
 | Local | `http://localhost:3000` | Neon dev (`.env`) |
-| Staging | `https://maatiilink-staging.*` (set when deployed) | Separate Neon project/branch |
+| Staging | https://maatii-link.vercel.app | Neon staging branch / Vercel env |
 | Production | Bank IT assigned | Isolated DB, no dev credentials |
 
 ---
@@ -143,5 +143,7 @@ prisma/
 | Item | Status |
 |------|--------|
 | Architecture reviewed by SABA CODERS | Approved May 2026 |
-| Staging plan documented | `STAGING.md` |
+| Staging live | https://maatii-link.vercel.app |
+| Health check | `/api/health` — database connected |
+| Staging documented | `STAGING.md` |
 | CI pipeline | `.github/workflows/ci.yml` |

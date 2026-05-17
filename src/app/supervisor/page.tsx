@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
+import { SupervisorEodTable } from "@/components/eod/SupervisorEodTable";
 import { getServerSession } from "@/lib/auth/server";
 import { hasPermission, Permission } from "@/lib/rbac";
-import { prisma } from "@/lib/prisma";
+import { getBranchEodSummaryForToday } from "@/lib/eod/branch-summary";
+import { getAddisDateString } from "@/lib/eod/constants";
 
 export default async function SupervisorPage() {
   const session = await getServerSession();
@@ -12,48 +14,44 @@ export default async function SupervisorPage() {
     redirect("/dashboard");
   }
 
-  const branches = await prisma.branch.findMany({
-    orderBy: { name: "asc" },
-    select: { id: true, name: true, branchCode: true, district: true, isSmartBranch: true },
-  });
+  const eodRows = await getBranchEodSummaryForToday();
+
+  const onTime = eodRows.filter((r) =>
+    ["SUBMITTED", "LOCKED"].includes(r.eodStatus),
+  ).length;
+  const missing = eodRows.filter((r) => ["MISSING", "LATE"].includes(r.eodStatus)).length;
 
   return (
     <AppShell user={session}>
-      <div className="mb-8">
+      <header className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900">Supervisor dashboard</h1>
         <p className="text-slate-500">
-          Branch compliance overview (full metrics in Sprint 4)
+          EOD compliance — {getAddisDateString()} (Addis Ababa)
         </p>
-      </div>
+      </header>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
-            <tr>
-              <th className="px-4 py-3">Branch</th>
-              <th className="px-4 py-3">Code</th>
-              <th className="px-4 py-3">District</th>
-              <th className="px-4 py-3">Type</th>
-            </tr>
-          </thead>
-          <tbody>
-            {branches.map((b) => (
-              <tr key={b.id} className="border-b border-slate-100 last:border-0">
-                <td className="px-4 py-3 font-medium">{b.name}</td>
-                <td className="px-4 py-3 text-slate-600">{b.branchCode}</td>
-                <td className="px-4 py-3 text-slate-600">{b.district ?? "—"}</td>
-                <td className="px-4 py-3 text-slate-600">
-                  {b.isSmartBranch ? "Smart" : "Standard"}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <section className="mb-6 grid gap-4 sm:grid-cols-3">
+        <StatCard label="Branches" value={String(eodRows.length)} />
+        <StatCard label="EOD submitted" value={String(onTime)} />
+        <StatCard label="Missing / late" value={String(missing)} />
+      </section>
 
-      <p className="mt-4 text-xs text-slate-500">
-        EOD on-time %, incidents, and directive overdue columns will appear in Sprint 4.
-      </p>
+      <section>
+        <h2 className="mb-4 text-lg font-semibold">Today&apos;s EOD by branch</h2>
+        <SupervisorEodTable rows={eodRows} />
+        <p className="mt-3 text-xs text-slate-500">
+          Click Lock after reviewing a submitted EOD. Sprint 4 adds full compliance columns.
+        </p>
+      </section>
     </AppShell>
+  );
+}
+
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p className="text-xs uppercase text-slate-500">{label}</p>
+      <p className="text-2xl font-bold text-slate-900">{value}</p>
+    </article>
   );
 }

@@ -13,6 +13,11 @@ export function AppShell({ user, branchLabel, children }: AppShellProps) {
   const nav = [
     { href: "/dashboard", label: "Dashboard", show: true },
     {
+      href: "/eod",
+      label: "EOD",
+      show: hasPermission(user.role, Permission.EOD_VIEW_BRANCH),
+    },
+    {
       href: "/supervisor",
       label: "Supervisor",
       show: hasPermission(user.role, Permission.DASHBOARD_SUPERVISOR),

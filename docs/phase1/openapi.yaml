@@ -9,8 +9,8 @@ info:
 servers:
   - url: http://localhost:3000
     description: Local development
-  - url: https://staging.maatiilink.example
-    description: Staging (replace when deployed)
+  - url: https://maatii-link.vercel.app
+    description: Staging (Vercel + Neon)
 
 tags:
   - name: Health
