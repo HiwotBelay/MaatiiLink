@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Role } from "@prisma/client";
+import { MaatiiLinkLogo } from "@/components/brand/MaatiiLinkLogo";
 import { LogoutButton } from "./LogoutButton";
 import { ProductionBanner } from "./ProductionBanner";
 import { hasPermission, Permission } from "@/lib/rbac";
@@ -72,9 +73,7 @@ export function AppShell({ user, branchLabel, children }: AppShellProps) {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-3">
           <div className="flex items-center gap-6">
-            <Link href="/dashboard" className="font-semibold text-[#00529b]">
-              MaatiiLink
-            </Link>
+            <MaatiiLinkLogo href="/dashboard" height={36} priority />
             <nav className="flex gap-4 text-sm">
               {nav.map((item) => (
                 <Link

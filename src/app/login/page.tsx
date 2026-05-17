@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { MaatiiLinkLogo } from "@/components/brand/MaatiiLinkLogo";
 import { LoginForm } from "@/components/auth/LoginForm";
 
 export default function LoginPage() {
@@ -9,7 +10,9 @@ export default function LoginPage() {
         <p className="text-xs font-semibold uppercase tracking-widest text-[#00529b]">
           Cooperative Bank of Oromia
         </p>
-        <h1 className="mt-1 text-2xl font-bold text-slate-900">MaatiiLink</h1>
+        <div className="mt-3 mb-2">
+          <MaatiiLinkLogo height={44} priority />
+        </div>
         <p className="mb-6 text-sm text-slate-500">Sign in to your branch account</p>
         <Suspense fallback={<p className="text-sm text-slate-500">Loading…</p>}>
           <LoginForm />

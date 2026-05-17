@@ -174,7 +174,8 @@ Ask them to reply **“G2 approved”** (or list changes). Record approval in `S
 |---------|-----|
 | Health `database: disconnected` | Wrong `DATABASE_URL` on Vercel; redeploy after fixing env |
 | Health `ok` but login fails | Run `migrate deploy` + `db:seed` on staging DB (Step 2) |
-| 500 on login | Check Vercel **Functions** logs; confirm `SESSION_SECRET` is set |
+| Login shows "Network error" or 500 | **`SESSION_SECRET` missing or shorter than 32 chars** on Vercel — add env, redeploy. Check `/api/health`: `auth` should be `configured` |
+| 500 on login | Check Vercel **Functions** logs; confirm `SESSION_SECRET` is set (32+ characters) |
 | Build OK, empty DB | Seed not run against **staging** URL |
 | SSL errors | URL must include `?sslmode=require` |
 

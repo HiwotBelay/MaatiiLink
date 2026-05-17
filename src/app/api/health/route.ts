@@ -5,6 +5,7 @@ import { getDeploymentEnvironment, getReleaseVersion } from "@/lib/ops/release";
 
 export async function GET() {
   const env = runEnvChecks();
+  const authConfigured = env.checks.sessionSecret === "ok";
 
   try {
     const branchCount = await prisma.branch.count();
@@ -19,6 +20,9 @@ export async function GET() {
         version: getReleaseVersion(),
         environment: getDeploymentEnvironment(),
         database: "connected",
+        auth: authConfigured
+          ? "configured"
+          : "missing SESSION_SECRET (min 32 chars)",
         env: {
           status: env.status,
           productionReady: env.productionReady,
@@ -38,6 +42,9 @@ export async function GET() {
         version: getReleaseVersion(),
         environment: getDeploymentEnvironment(),
         database: "disconnected",
+        auth: authConfigured
+          ? "configured"
+          : "missing SESSION_SECRET (min 32 chars)",
         env: {
           status: env.status,
           productionReady: false,

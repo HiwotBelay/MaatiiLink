@@ -20,7 +20,17 @@ export function LoginForm() {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
+      let data: { error?: string; redirectTo?: string } = {};
+      try {
+        data = await res.json();
+      } catch {
+        setError(
+          res.ok
+            ? "Unexpected server response."
+            : `Server error (${res.status}). Check Vercel env: SESSION_SECRET (32+ chars) and DATABASE_URL.`,
+        );
+        return;
+      }
 
       if (!res.ok) {
         setError(data.error ?? "Login failed");
