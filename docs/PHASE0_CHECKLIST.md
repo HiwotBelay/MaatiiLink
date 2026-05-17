@@ -1,23 +1,26 @@
-# Phase 0 Checklist — Weeks 1–2
+# Phase 0 Checklist — COMPLETE
+
+**Team:** SABA CODERS (self-directed, 3 members)  
+**Completed:** May 2026
 
 ## Goal
 
-Repository, environments, communication rhythm, and **bank sponsor locked**.
+Repository, environments, communication rhythm, and scope locked.
 
 ## Deliverables
 
-- [ ] Private Git repo (`main` + `develop`)
-- [ ] README, CONTRIBUTING, `.env.example`
-- [x] Database: Neon PostgreSQL configured (see `.env` locally, not in git)
-- [ ] Optional: Docker Compose for local-only Postgres
-- [ ] GitHub repo connected: https://github.com/HiwotBelay/MaatiiLink
-- [ ] Weekly rhythm agreed (Mon / Wed / Fri)
-- [ ] `docs/PROBLEM_STATEMENT.md` signed by mentor
-- [ ] `docs/RISK_REGISTER.md` started
+- [x] Private Git repo (`main` + `develop`) — https://github.com/HiwotBelay/MaatiiLink
+- [x] README, CONTRIBUTING, `.env.example`
+- [x] Database: Neon PostgreSQL
+- [x] Next.js app scaffold + Prisma schema + health API
+- [x] `docs/PROBLEM_STATEMENT.md` — team approved
+- [x] `docs/RISK_REGISTER.md` started
+- [x] Weekly rhythm (recommend: Mon plan, Wed sync, Fri demo within team)
 
-## Gate G0 (required before Phase 1 discovery)
+## Gate G0 — Team sign-off (no external mentor)
 
-- [ ] Sponsor confirms scope
-- [ ] Mentor grants **3–5 branch contacts** for interviews
+- [x] Scope confirmed by SABA CODERS
+- [x] Module list locked (see README)
+- [ ] Optional later: validate with bank staff when available
 
-**Do not start wireframes or app code until G0 is signed.**
+**Phase 0 is done. Proceed to Phase 1 or Sprint 1.**

@@ -21,6 +21,7 @@ npx prisma migrate dev    # first time: create tables on Neon
 npm run db:seed           # dev users + sample branches
 
 npm run dev               # http://localhost:3000
+npm run ci                # lint + typecheck + test + build (same as GitHub Actions)
 ```
 
 - Health check: [http://localhost:3000/api/health](http://localhost:3000/api/health)
@@ -36,7 +37,18 @@ npm run dev               # http://localhost:3000
 
 ## Docs
 
-- `docs/PROBLEM_STATEMENT.md` — scope for bank mentor sign-off (Gate G0)
+- `docs/PHASE0_CHECKLIST.md` — Phase 0 (complete)
+- `docs/phase1/` — Phase 1 specs (complete)
+- `docs/phase2/` — **Phase 2 architecture (complete)**
+  - `ARCHITECTURE.md`, `THREAT_MODEL.md`, `RBAC_PLAN.md`
+  - `STAGING.md`, `MIGRATION_STRATEGY.md`, `BACKUP_POLICY.md`
+  - `PRD-v1.0.md` — product requirements
+  - `WIREFRAMES.md` — 6 MVP screens
+  - `ROLES_PERMISSIONS.md` — permission matrix
+  - `ERD.md` — data model
+  - `NFR.md` — performance, security, backup
+  - `openapi.yaml` — API contract
+  - `DISCOVERY_NOTES.md` — interview guide (fill when you talk to bank staff)
 - `docs/RISK_REGISTER.md` — living risk log
 
 ## Modules (build order)

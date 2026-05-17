@@ -1,8 +1,8 @@
-# MaatiiLink — Problem Statement (Gate G0)
+# MaatiiLink — Problem Statement
 
 **Team:** SABA CODERS  
 **Client:** Cooperative Bank of Oromia — COOP DX Valley  
-**Status:** Draft — awaiting mentor sign-off
+**Status:** Approved by team — May 2026
 
 ---
 
@@ -27,12 +27,12 @@ Coopbank has digitized customer channels (Smart Branches, CoopApp, Michu, Mercha
 - Merchant Nation (merchant acquisition)  
 - Customer mobile apps  
 
-## Mentor sign-off (Gate G0)
+## Team sign-off
 
-| Item | Approved | Date | Name |
-|------|----------|------|------|
-| Problem statement | [ ] | | |
-| Module list | [ ] | | |
-| 3–5 branch contacts for Phase 1 interviews | [ ] | | |
+| Item | Approved | Date |
+|------|----------|------|
+| Problem statement | Yes | May 2026 |
+| Module list | Yes | May 2026 |
+| Build approach (production, not prototype) | Yes | May 2026 |
 
-**Mentor signature:** _________________________
+**SABA CODERS** — self-directed delivery. Optional bank validation before pilot.

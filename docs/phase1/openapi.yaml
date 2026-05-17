@@ -1,0 +1,267 @@
+openapi: 3.0.3
+info:
+  title: MaatiiLink API
+  description: Internal branch operations API for Cooperative Bank of Oromia
+  version: 1.0.0
+  contact:
+    name: SABA CODERS
+
+servers:
+  - url: http://localhost:3000
+    description: Local development
+  - url: https://staging.maatiilink.example
+    description: Staging (replace when deployed)
+
+tags:
+  - name: Health
+  - name: Auth
+  - name: EOD
+  - name: Incidents
+  - name: Directives
+  - name: Tickets
+  - name: Supervisor
+  - name: Audit
+
+paths:
+  /api/health:
+    get:
+      tags: [Health]
+      summary: Health check and DB connectivity
+      responses:
+        "200":
+          description: Service healthy
+        "503":
+          description: Database unavailable
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+      responses:
+        "200":
+          description: Session created (Set-Cookie)
+        "401":
+          description: Invalid credentials
+
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: End session
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200":
+          description: Logged out
+
+  /api/auth/me:
+    get:
+      tags: [Auth]
+      summary: Current user and role
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200":
+          description: User profile
+
+  /api/eod:
+    get:
+      tags: [EOD]
+      summary: List EOD reports (branch-scoped or all for supervisor)
+      security: [{ cookieAuth: [] }]
+      parameters:
+        - name: branchId
+          in: query
+          schema: { type: string }
+        - name: from
+          in: query
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        "200":
+          description: List of EOD reports
+    post:
+      tags: [EOD]
+      summary: Create or update draft EOD
+      security: [{ cookieAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EodReportInput"
+      responses:
+        "201":
+          description: EOD saved
+
+  /api/eod/{id}/submit:
+    post:
+      tags: [EOD]
+      summary: Submit EOD (manager only)
+      security: [{ cookieAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Submitted
+
+  /api/incidents:
+    get:
+      tags: [Incidents]
+      summary: List incidents
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200":
+          description: Incident list
+    post:
+      tags: [Incidents]
+      summary: Create incident
+      security: [{ cookieAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IncidentInput"
+      responses:
+        "201":
+          description: Created
+
+  /api/incidents/{id}:
+    patch:
+      tags: [Incidents]
+      summary: Update incident status
+      security: [{ cookieAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Updated
+
+  /api/directives:
+    get:
+      tags: [Directives]
+      summary: List active directives
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200":
+          description: Directive list
+    post:
+      tags: [Directives]
+      summary: Publish directive (HO_ADMIN)
+      security: [{ cookieAuth: [] }]
+      responses:
+        "201":
+          description: Published
+
+  /api/directives/{id}/acknowledge:
+    post:
+      tags: [Directives]
+      summary: Branch acknowledgment
+      security: [{ cookieAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Acknowledged
+
+  /api/tickets:
+    get:
+      tags: [Tickets]
+      summary: List service tickets
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200":
+          description: Ticket list
+    post:
+      tags: [Tickets]
+      summary: Create ticket
+      security: [{ cookieAuth: [] }]
+      responses:
+        "201":
+          description: Created
+
+  /api/tickets/{id}:
+    patch:
+      tags: [Tickets]
+      summary: Update ticket (assign, status)
+      security: [{ cookieAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Updated
+
+  /api/supervisor/summary:
+    get:
+      tags: [Supervisor]
+      summary: Branch compliance dashboard data
+      security: [{ cookieAuth: [] }]
+      responses:
+        "200":
+          description: Per-branch summary rows
+
+  /api/audit:
+    get:
+      tags: [Audit]
+      summary: Query audit logs (HO_ADMIN, AUDITOR)
+      security: [{ cookieAuth: [] }]
+      parameters:
+        - name: from
+          in: query
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          schema: { type: string, format: date-time }
+      responses:
+        "200":
+          description: Audit log entries
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: maatiilink_session
+
+  schemas:
+    EodReportInput:
+      type: object
+      required: [reportDate]
+      properties:
+        reportDate: { type: string, format: date }
+        openingCashBand: { type: string }
+        closingCashBand: { type: string }
+        anomalyNotes: { type: string }
+        complaintCount: { type: integer }
+        staffingNotes: { type: string }
+
+    IncidentInput:
+      type: object
+      required: [category, severity, title, description]
+      properties:
+        category: { type: string }
+        severity:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, CRITICAL]
+        title: { type: string }
+        description: { type: string }

@@ -49,7 +49,7 @@ export default function HomePage() {
             </p>
           </div>
           <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-800">
-            Sprint 0 - Scaffold live
+            Phase 0 complete
           </span>
         </div>
       </header>
@@ -105,7 +105,7 @@ export default function HomePage() {
             <li>
               <code className="rounded bg-white/60 px-1">/api/health</code> shows database connected
             </li>
-            <li>Gate G0: mentor signs docs/PROBLEM_STATEMENT.md</li>
+            <li>Phase 1 or Sprint 1: start auth module (see docs/DEV_SETUP.md)</li>
           </ul>
         </section>
       </main>
