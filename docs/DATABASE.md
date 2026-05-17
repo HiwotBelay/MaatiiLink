@@ -5,8 +5,9 @@ MaatiiLink uses **[Neon](https://neon.tech)** for PostgreSQL in development (and
 ## Connection
 
 1. Each developer copies `.env.example` to `.env`
-2. Paste the **pooled** connection string from the Neon project (Connection details → pooled)
-3. Always include `sslmode=require` for Neon
+2. **Local dev:** paste the **direct** connection string (no `-pooler` in hostname) into both `DATABASE_URL` and `DIRECT_URL` in `.env`
+3. **Vercel:** use **pooled** for `DATABASE_URL` (`?sslmode=require&pgbouncer=true&connection_limit=1`) and **direct** for `DIRECT_URL`
+4. Always include `sslmode=require` for Neon
 
 ## Team access
 

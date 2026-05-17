@@ -22,4 +22,6 @@
 
 ## Next
 
-**Sprint 3:** Incidents & directives (UAT on staging)
+**Sprint 3:** Incidents & directives — see `docs/phase3/SPRINT3_CHECKLIST.md`
+
+**Next:** Sprint 4 (service desk, dashboard export, admin)

@@ -30,4 +30,17 @@ describe("rbac", () => {
     expect(isPublicApiPath("/api/auth/login")).toBe(true);
     expect(isPublicApiPath("/api/eod")).toBe(false);
   });
+
+  it("pilot permissions by role", () => {
+    expect(hasPermission("BRANCH_STAFF", Permission.PILOT_FEEDBACK_CREATE)).toBe(true);
+    expect(hasPermission("BRANCH_STAFF", Permission.PILOT_VIEW)).toBe(false);
+    expect(hasPermission("SUPERVISOR", Permission.PILOT_VIEW)).toBe(true);
+    expect(hasPermission("HO_ADMIN", Permission.PILOT_FEEDBACK_TRIAGE)).toBe(true);
+    expect(hasPermission("AUDITOR", Permission.PILOT_FEEDBACK_TRIAGE)).toBe(false);
+  });
+
+  it("ops view is HO admin only", () => {
+    expect(hasPermission("HO_ADMIN", Permission.OPS_VIEW)).toBe(true);
+    expect(hasPermission("SUPERVISOR", Permission.OPS_VIEW)).toBe(false);
+  });
 });

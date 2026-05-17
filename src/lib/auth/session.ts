@@ -11,19 +11,20 @@ export type SessionPayload = {
 };
 
 function getSecret(): Uint8Array {
-  const secret = process.env.SESSION_SECRET;
-  if (!secret || secret.length < 32) {
+  const raw = process.env.SESSION_SECRET?.trim().replace(/^["']|["']$/g, "");
+  if (!raw || raw.length < 32) {
     throw new Error("SESSION_SECRET must be set and at least 32 characters");
   }
-  return new TextEncoder().encode(secret);
+  return new TextEncoder().encode(raw);
 }
 
 export async function createSessionToken(payload: SessionPayload): Promise<string> {
+  // Jose may omit null claims — use "" so branch managers always round-trip branchId
   return new SignJWT({
     email: payload.email,
     name: payload.name,
     role: payload.role,
-    branchId: payload.branchId,
+    branchId: payload.branchId ?? "",
   })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(payload.sub)
@@ -53,12 +54,17 @@ export async function verifySessionToken(
       return null;
     }
 
+    const normalizedBranchId =
+      branchId === null || branchId === undefined || branchId === ""
+        ? null
+        : String(branchId);
+
     return {
       sub,
       email,
       name,
       role: role as Role,
-      branchId: branchId === null || branchId === undefined ? null : String(branchId),
+      branchId: normalizedBranchId,
     };
   } catch {
     return null;

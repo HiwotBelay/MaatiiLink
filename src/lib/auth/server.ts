@@ -22,10 +22,12 @@ export async function getServerSession(): Promise<AuthUser | null> {
 
   if (!user || !user.isActive) return null;
 
+  const sessionBranch = session.branchId ?? null;
+  const userBranch = user.branchId ?? null;
   if (
     user.role !== session.role ||
     user.email !== session.email ||
-    user.branchId !== session.branchId
+    sessionBranch !== userBranch
   ) {
     return null;
   }

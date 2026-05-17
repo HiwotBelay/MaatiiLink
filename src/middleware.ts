@@ -2,7 +2,13 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { SESSION_COOKIE } from "@/lib/auth/constants";
 import { verifySessionToken } from "@/lib/auth/session";
-import { defaultRouteForRole, isPublicApiPath } from "@/lib/rbac";
+import {
+  defaultRouteForRole,
+  hasPermission,
+  isPublicApiPath,
+  Permission,
+} from "@/lib/rbac";
+import { isCsrfSafe } from "@/lib/security/csrf";
 
 const PUBLIC_UI = ["/", "/login"];
 
@@ -17,6 +23,12 @@ export async function middleware(request: NextRequest) {
   const session = await getSession(request);
 
   if (pathname.startsWith("/api")) {
+    if (!isCsrfSafe(request)) {
+      return NextResponse.json(
+        { ok: false, error: "Invalid request origin" },
+        { status: 403 },
+      );
+    }
     if (isPublicApiPath(pathname)) {
       return NextResponse.next();
     }
@@ -57,6 +69,34 @@ export async function middleware(request: NextRequest) {
   if (session && pathname.startsWith("/supervisor")) {
     const allowed = ["SUPERVISOR", "HO_ADMIN", "AUDITOR"].includes(session.role);
     if (!allowed) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+  }
+
+  if (session && pathname.startsWith("/admin")) {
+    if (session.role !== "HO_ADMIN") {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+  }
+
+  if (session && pathname.startsWith("/ops")) {
+    if (session.role !== "HO_ADMIN") {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+  }
+
+  if (session && pathname.startsWith("/audit")) {
+    const allowed = ["HO_ADMIN", "AUDITOR", "SUPERVISOR"].includes(session.role);
+    if (!allowed) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+  }
+
+  if (session && pathname.startsWith("/pilot")) {
+    const canPilot =
+      hasPermission(session.role, Permission.PILOT_VIEW) ||
+      hasPermission(session.role, Permission.PILOT_FEEDBACK_CREATE);
+    if (!canPilot) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }

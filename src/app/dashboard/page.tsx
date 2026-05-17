@@ -4,6 +4,8 @@ import { AppShell } from "@/components/layout/AppShell";
 import { getServerSession } from "@/lib/auth/server";
 import { defaultRouteForRole } from "@/lib/rbac";
 import { getTodayEod } from "@/lib/eod/service";
+import { countOpenIncidentsForBranch } from "@/lib/incident/service";
+import { countOverdueAcksForBranch } from "@/lib/directive/service";
 import { prisma } from "@/lib/prisma";
 import { Building2, FileText, AlertTriangle, Megaphone, Ticket } from "lucide-react";
 
@@ -15,11 +17,18 @@ export default async function DashboardPage() {
     redirect(defaultRouteForRole(session.role));
   }
 
-  const branch = session.branchId
-    ? await prisma.branch.findUnique({ where: { id: session.branchId } })
-    : null;
-
-  const todayEod = session.branchId ? await getTodayEod(session) : null;
+  const [branch, todayEod, openIncidents, overdueDirectives] = await Promise.all([
+    session.branchId
+      ? prisma.branch.findUnique({ where: { id: session.branchId } })
+      : Promise.resolve(null),
+    session.branchId ? getTodayEod(session) : Promise.resolve(null),
+    session.branchId
+      ? countOpenIncidentsForBranch(session.branchId)
+      : Promise.resolve(0),
+    session.branchId
+      ? countOverdueAcksForBranch(session.branchId)
+      : Promise.resolve(0),
+  ]);
 
   const eodLabel = !todayEod
     ? { text: "Not started", color: "text-red-600" }
@@ -49,27 +58,32 @@ export default async function DashboardPage() {
     },
     {
       title: "Incidents",
-      desc: "Sprint 3",
+      desc: "Exception log",
       icon: AlertTriangle,
-      status: "Coming soon",
-      href: "#",
-      live: false,
+      status: openIncidents > 0 ? `${openIncidents} open` : "None open",
+      statusColor: openIncidents > 0 ? "text-amber-600" : "text-emerald-600",
+      href: "/incidents",
+      live: true,
     },
     {
       title: "Directives",
-      desc: "Sprint 3",
+      desc: "HO circulars",
       icon: Megaphone,
-      status: "Coming soon",
-      href: "#",
-      live: false,
+      status:
+        overdueDirectives > 0
+          ? `${overdueDirectives} overdue`
+          : "Up to date",
+      statusColor: overdueDirectives > 0 ? "text-red-600" : "text-emerald-600",
+      href: "/directives",
+      live: true,
     },
     {
       title: "Service desk",
-      desc: "Sprint 4",
+      desc: "IT & facilities requests",
       icon: Ticket,
-      status: "Coming soon",
-      href: "#",
-      live: false,
+      status: "Open tickets",
+      href: "/tickets",
+      live: true,
     },
   ];
 

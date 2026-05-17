@@ -118,16 +118,24 @@ export async function upsertEodDraft(
   };
 
   if (existing) {
-    return prisma.eodReport.update({
+    const updated = await prisma.eodReport.update({
       where: { id: existing.id },
       data,
       include: {
         branch: { select: { name: true, branchCode: true } },
       },
     });
+    await writeAuditLog({
+      userId: user.id,
+      action: "EOD_DRAFT_SAVE",
+      entityType: "EodReport",
+      entityId: updated.id,
+      metadata: { branchId, reportDate: reportDate.toISOString() },
+    });
+    return updated;
   }
 
-  return prisma.eodReport.create({
+  const created = await prisma.eodReport.create({
     data: {
       branchId,
       reportDate,
@@ -137,6 +145,14 @@ export async function upsertEodDraft(
       branch: { select: { name: true, branchCode: true } },
     },
   });
+  await writeAuditLog({
+    userId: user.id,
+    action: "EOD_DRAFT_SAVE",
+    entityType: "EodReport",
+    entityId: created.id,
+    metadata: { branchId, reportDate: reportDate.toISOString() },
+  });
+  return created;
 }
 
 export async function submitEod(

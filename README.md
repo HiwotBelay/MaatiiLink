@@ -15,6 +15,11 @@ Built by **SABA CODERS** at COOP DX Valley.
 | Phase 2 — Architecture & infra | **Complete** (Gate G2 staging live) |
 | Sprint 1 — Auth | Complete |
 | Sprint 2 — EOD | Complete |
+| Sprint 3 — Incidents & directives | Complete |
+| Sprint 4 — Service desk & admin | Complete |
+| Phase 4 — Security & UAT | Complete |
+| Phase 5 — Pilot deployment | Complete |
+| Phase 6 — Production go-live | **In progress** (ops dashboard, admin provisioning) |
 
 **Staging:** https://maatii-link.vercel.app · [Health](https://maatii-link.vercel.app/api/health) · [Login](https://maatii-link.vercel.app/login)
 
@@ -30,6 +35,7 @@ npm run db:seed           # dev users + sample branches
 
 npm run dev               # http://localhost:3000
 npm run ci                # lint + typecheck + test + build (same as GitHub Actions)
+npm run smoke             # Phase 6 — health + auth smoke (set APP_URL)
 ```
 
 - Health check: [http://localhost:3000/api/health](http://localhost:3000/api/health)
@@ -58,6 +64,8 @@ npm run ci                # lint + typecheck + test + build (same as GitHub Acti
   - `openapi.yaml` — API contract
   - `DISCOVERY_NOTES.md` — interview guide (fill when you talk to bank staff)
 - `docs/RISK_REGISTER.md` — living risk log
+- `docs/phase5/` — pilot plan, training, Gate G5 checklist, production setup
+- `docs/phase6/` — go-live runbook, hypercare, national rollout, Gate G6
 
 ## Modules (build order)
 

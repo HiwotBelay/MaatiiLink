@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum Role {
@@ -56,6 +57,28 @@ enum TicketPriority {
   URGENT
 }
 
+enum PilotFeedbackCategory {
+  BUG
+  UX
+  TRAINING
+  FEATURE
+  OTHER
+}
+
+enum PilotFeedbackSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  SEV1
+}
+
+enum PilotFeedbackStatus {
+  OPEN
+  TRIAGED
+  FIXED
+  WONTFIX
+}
+
 model Branch {
   id            String   @id @default(cuid())
   name          String
@@ -63,6 +86,7 @@ model Branch {
   district      String?
   region        String?
   isSmartBranch Boolean  @default(false)
+  isPilotBranch Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -71,6 +95,24 @@ model Branch {
   incidents          Incident[]
   directiveAcks      DirectiveAcknowledgment[]
   tickets            ServiceTicket[]
+  pilotFeedback      PilotFeedback[]
+}
+
+model PilotFeedback {
+  id          String                @id @default(cuid())
+  branchId    String?
+  branch      Branch?               @relation(fields: [branchId], references: [id])
+  userId      String?
+  user        User?                 @relation(fields: [userId], references: [id], onDelete: SetNull)
+  category    PilotFeedbackCategory
+  severity    PilotFeedbackSeverity @default(MEDIUM)
+  status      PilotFeedbackStatus   @default(OPEN)
+  description String
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
 }
 
 model User {
@@ -92,6 +134,7 @@ model User {
   ticketsAssigned       ServiceTicket[]             @relation("TicketAssignee")
   directivesPublished   Directive[]                 @relation("DirectivePublisher")
   auditLogs             AuditLog[]
+  pilotFeedback         PilotFeedback[]
 }
 
 model EodReport {

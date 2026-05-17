@@ -22,6 +22,10 @@ export const Permission = {
   ADMIN_USERS: "admin:users",
   AUDIT_EXPORT: "audit:export",
   AUDIT_VIEW: "audit:view",
+  PILOT_VIEW: "pilot:view",
+  PILOT_FEEDBACK_CREATE: "pilot:feedback:create",
+  PILOT_FEEDBACK_TRIAGE: "pilot:feedback:triage",
+  OPS_VIEW: "ops:view",
 } as const;
 
 export type PermissionKey = (typeof Permission)[keyof typeof Permission];
@@ -34,6 +38,7 @@ const ROLE_PERMISSIONS: Record<Role, ReadonlySet<PermissionKey>> = {
     Permission.DIRECTIVE_VIEW,
     Permission.TICKET_CREATE,
     Permission.TICKET_VIEW_BRANCH,
+    Permission.PILOT_FEEDBACK_CREATE,
   ]),
   BRANCH_MANAGER: new Set([
     Permission.EOD_DRAFT,
@@ -46,6 +51,7 @@ const ROLE_PERMISSIONS: Record<Role, ReadonlySet<PermissionKey>> = {
     Permission.DIRECTIVE_ACK,
     Permission.TICKET_CREATE,
     Permission.TICKET_VIEW_BRANCH,
+    Permission.PILOT_FEEDBACK_CREATE,
   ]),
   SUPERVISOR: new Set([
     Permission.EOD_LOCK,
@@ -58,6 +64,8 @@ const ROLE_PERMISSIONS: Record<Role, ReadonlySet<PermissionKey>> = {
     Permission.TICKET_VIEW_ALL,
     Permission.DASHBOARD_SUPERVISOR,
     Permission.AUDIT_VIEW,
+    Permission.PILOT_VIEW,
+    Permission.PILOT_FEEDBACK_CREATE,
   ]),
   HO_ADMIN: new Set([
     Permission.EOD_DRAFT,
@@ -77,6 +85,10 @@ const ROLE_PERMISSIONS: Record<Role, ReadonlySet<PermissionKey>> = {
     Permission.ADMIN_USERS,
     Permission.AUDIT_EXPORT,
     Permission.AUDIT_VIEW,
+    Permission.PILOT_VIEW,
+    Permission.PILOT_FEEDBACK_TRIAGE,
+    Permission.PILOT_FEEDBACK_CREATE,
+    Permission.OPS_VIEW,
   ]),
   AUDITOR: new Set([
     Permission.EOD_VIEW_ALL,
@@ -86,6 +98,7 @@ const ROLE_PERMISSIONS: Record<Role, ReadonlySet<PermissionKey>> = {
     Permission.DASHBOARD_SUPERVISOR,
     Permission.AUDIT_EXPORT,
     Permission.AUDIT_VIEW,
+    Permission.PILOT_VIEW,
   ]),
 };
 

@@ -48,6 +48,8 @@ Same dev test users as local (after seed on staging DB). See `docs/phase2/STAGIN
 | admin@maatiilink.local | HO_ADMIN | /supervisor |
 | manager@maatiilink.local | BRANCH_MANAGER | /dashboard |
 | supervisor@maatiilink.local | SUPERVISOR | /supervisor |
+| auditor@maatiilink.local | AUDITOR | /supervisor (read-only) |
+| manager2@maatiilink.local | BRANCH_MANAGER | /dashboard (Merkato branch) |
 
 Password for all: `ChangeMe123!` (see `prisma/seed.ts` — change before pilot)
 
@@ -86,3 +88,30 @@ Password for all: `ChangeMe123!` (see `prisma/seed.ts` — change before pilot)
 | POST | `/api/eod/[id]/lock` | Supervisor lock |
 
 EOD lifecycle: `DRAFT` → `SUBMITTED` → `LOCKED`
+
+## Sprint 3 (incidents & directives) — done
+
+**Branch users** (`manager@maatiilink.local`):
+
+- `/incidents` — report and update incidents for your branch
+- `/directives` — read HO circulars and acknowledge on behalf of branch
+
+**HO admin** (`admin@maatiilink.local`):
+
+- `/directives/new` — publish directives
+- `/incidents` — view all branches
+
+**Supervisor** (`supervisor@maatiilink.local`):
+
+- `/supervisor` — EOD + open incidents + overdue directive acks per branch
+- Critical incident banner when any CRITICAL is open
+- `/incidents` — network-wide list
+
+**Email** (optional): set `SMTP_*` and `SUPERVISOR_NOTIFY_EMAIL` in `.env` (see `.env.example`)
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET/POST | `/api/incidents` | List / create |
+| PATCH | `/api/incidents/[id]` | Update status |
+| GET/POST | `/api/directives` | List / publish |
+| POST | `/api/directives/[id]/acknowledge` | Branch ack |

@@ -1,11 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-
 export function LoginForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -20,6 +16,7 @@ export function LoginForm() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify({ email, password }),
       });
 
@@ -30,14 +27,11 @@ export function LoginForm() {
         return;
       }
 
-      const next = searchParams.get("next");
-      const dest =
-        next && next.startsWith("/") && !next.startsWith("//")
-          ? next
-          : data.redirectTo ?? "/dashboard";
+      // Prefer server role-based route (avoids stale ?next= trapping users on /login)
+      const dest = data.redirectTo ?? "/dashboard";
 
-      router.push(dest);
-      router.refresh();
+      window.location.assign(dest);
+      return;
     } catch {
       setError("Network error. Please try again.");
     } finally {

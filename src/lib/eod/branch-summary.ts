@@ -12,6 +12,7 @@ export async function getBranchEodSummaryForToday() {
       name: true,
       branchCode: true,
       district: true,
+      region: true,
       eodReports: {
         where: { reportDate: today },
         take: 1,
@@ -33,6 +34,7 @@ export async function getBranchEodSummaryForToday() {
       name: b.name,
       branchCode: b.branchCode,
       district: b.district,
+      region: b.region,
       eodStatus,
       reportId: report?.id ?? null,
       submittedAt: report?.submittedAt?.toISOString() ?? null,
