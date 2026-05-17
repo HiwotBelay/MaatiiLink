@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Building2, CheckCircle2, Database, LogIn } from "lucide-react";
+import { MaatiiLinkLogo } from "@/components/brand/MaatiiLinkLogo";
 
 const modules = [
   {
@@ -43,8 +44,10 @@ export default function HomePage() {
             <p className="text-xs font-semibold uppercase tracking-widest text-[var(--primary)]">
               Cooperative Bank of Oromia
             </p>
-            <h1 className="text-2xl font-bold text-foreground">MaatiiLink</h1>
-            <p className="text-sm text-muted-foreground">
+            <div className="mt-2">
+              <MaatiiLinkLogo height={48} priority />
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
               Branch-to-Head Office Operations Bridge
             </p>
           </div>
