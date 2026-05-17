@@ -35,16 +35,19 @@ npm run dev
 
 ## Dev test users (after seed)
 
-| Email | Role |
-|-------|------|
-| admin@maatiilink.local | HO_ADMIN |
-| manager@maatiilink.local | BRANCH_MANAGER |
-| supervisor@maatiilink.local | SUPERVISOR |
+| Email | Role | Lands on |
+|-------|------|----------|
+| admin@maatiilink.local | HO_ADMIN | /supervisor |
+| manager@maatiilink.local | BRANCH_MANAGER | /dashboard |
+| supervisor@maatiilink.local | SUPERVISOR | /supervisor |
 
-Password for all dev seeds: see `prisma/seed.ts` (change before any pilot).
+Password for all: `ChangeMe123!` (see `prisma/seed.ts` — change before pilot)
 
-## Sprint 1 next
+## Sprint 1 (auth) — done
 
-- Login page + session
-- Role-based route protection
-- Audit log on auth events
+- `/login` — sign in
+- Session cookie (HTTP-only, 8h)
+- `/dashboard` — branch roles
+- `/supervisor` — supervisor / HO / auditor
+- `/api/auth/login`, `/logout`, `/me`
+- Audit log on LOGIN / LOGOUT

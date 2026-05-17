@@ -65,11 +65,24 @@ async function main() {
     },
   });
 
+  await prisma.user.upsert({
+    where: { email: "staff@maatiilink.local" },
+    update: {},
+    create: {
+      email: "staff@maatiilink.local",
+      name: "Branch Staff (Dev)",
+      passwordHash,
+      role: Role.BRANCH_STAFF,
+      branchId: smart.id,
+    },
+  });
+
   console.log("Seed complete:", { branches: [hq.branchCode, smart.branchCode] });
   console.log("Dev logins (change passwords before pilot):");
   console.log("  admin@maatiilink.local / ChangeMe123!");
   console.log("  manager@maatiilink.local / ChangeMe123!");
   console.log("  supervisor@maatiilink.local / ChangeMe123!");
+  console.log("  staff@maatiilink.local / ChangeMe123!");
 }
 
 main()

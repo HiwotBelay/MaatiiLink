@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Building2, CheckCircle2, Database, Shield } from "lucide-react";
+import { Building2, CheckCircle2, Database, LogIn } from "lucide-react";
 
 const modules = [
   {
@@ -49,7 +49,7 @@ export default function HomePage() {
             </p>
           </div>
           <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-800">
-            Phase 0 complete
+            Sprint 1 - Auth live
           </span>
         </div>
       </header>
@@ -64,16 +64,19 @@ export default function HomePage() {
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
-              href="/api/health"
+              href="/login"
               className="inline-flex items-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
             >
-              <Database className="h-4 w-4" />
-              Check API / DB
+              <LogIn className="h-4 w-4" />
+              Sign in
             </Link>
-            <span className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground">
-              <Shield className="h-4 w-4" />
-              Auth module - Sprint 1
-            </span>
+            <Link
+              href="/api/health"
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm hover:bg-slate-50"
+            >
+              <Database className="h-4 w-4" />
+              API health
+            </Link>
           </div>
         </section>
 
@@ -105,7 +108,7 @@ export default function HomePage() {
             <li>
               <code className="rounded bg-white/60 px-1">/api/health</code> shows database connected
             </li>
-            <li>Phase 1 or Sprint 1: start auth module (see docs/DEV_SETUP.md)</li>
+            <li>Sign in at /login (see docs/DEV_SETUP.md for dev accounts)</li>
           </ul>
         </section>
       </main>
