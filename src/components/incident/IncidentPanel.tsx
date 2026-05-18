@@ -112,7 +112,7 @@ export function IncidentPanel({
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="field-control inline-block w-auto min-w-36"
           >
             <option value="">All statuses</option>
             {INCIDENT_STATUSES.map((s) => (
@@ -124,7 +124,7 @@ export function IncidentPanel({
           <select
             value={severityFilter}
             onChange={(e) => setSeverityFilter(e.target.value)}
-            className="ml-2 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="field-control ml-2 inline-block w-auto min-w-36"
           >
             <option value="">All severities</option>
             {INCIDENT_SEVERITIES.map((s) => (
@@ -138,7 +138,7 @@ export function IncidentPanel({
           <button
             type="button"
             onClick={() => setShowForm(!showForm)}
-            className="rounded-lg bg-[#00529b] px-4 py-2 text-sm font-medium text-white hover:bg-[#003d73]"
+            className="btn-primary px-4 py-2 text-sm"
           >
             + Report incident
           </button>
@@ -146,13 +146,13 @@ export function IncidentPanel({
       </div>
 
       {error && (
-        <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+        <p className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{error}</p>
       )}
 
       {showForm && canCreate && (
         <form
           onSubmit={createIncident}
-          className="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+          className="polished-card reveal-up mb-8 rounded-[1.5rem] p-6"
         >
           <h2 className="mb-4 font-semibold">New incident</h2>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -161,7 +161,7 @@ export function IncidentPanel({
               <select
                 value={form.category}
                 onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+                className="field-control mt-1"
               >
                 {INCIDENT_CATEGORIES.map((c) => (
                   <option key={c} value={c}>
@@ -175,7 +175,7 @@ export function IncidentPanel({
               <select
                 value={form.severity}
                 onChange={(e) => setForm((f) => ({ ...f, severity: e.target.value }))}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+                className="field-control mt-1"
               >
                 {INCIDENT_SEVERITIES.map((s) => (
                   <option key={s} value={s}>
@@ -192,7 +192,7 @@ export function IncidentPanel({
               minLength={3}
               value={form.title}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+              className="field-control mt-1"
             />
           </label>
           <label className="mt-4 block text-sm">
@@ -203,21 +203,21 @@ export function IncidentPanel({
               rows={4}
               value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+              className="field-control mt-1"
             />
           </label>
           <div className="mt-4 flex gap-2">
             <button
               type="submit"
               disabled={loading}
-              className="rounded-lg bg-[#00529b] px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+              className="btn-primary px-4 py-2 text-sm disabled:opacity-50"
             >
               Submit
             </button>
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm"
+              className="btn-secondary px-4 py-2 text-sm"
             >
               Cancel
             </button>
@@ -225,7 +225,7 @@ export function IncidentPanel({
         </form>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="polished-card overflow-hidden rounded-[1.5rem]">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
             <tr>

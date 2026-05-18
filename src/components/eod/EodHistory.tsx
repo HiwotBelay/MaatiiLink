@@ -13,7 +13,7 @@ export function EodHistory({ reports }: { reports: Row[] }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className="polished-card overflow-hidden rounded-[1.5rem]">
       <table className="w-full text-left text-sm">
         <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
           <tr>

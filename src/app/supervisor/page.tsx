@@ -41,7 +41,7 @@ export default async function SupervisorPage() {
       </header>
 
       {totalCriticalOpen > 0 && (
-        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
+        <div className="mb-6 rounded-[1.5rem] border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-900 shadow-sm">
           <strong>{totalCriticalOpen} critical incident(s)</strong> require attention.{" "}
           <Link href="/incidents" className="font-medium underline">
             View incidents
@@ -90,7 +90,7 @@ export default async function SupervisorPage() {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <article className="polished-card hover-lift rounded-3xl p-4">
       <p className="text-xs uppercase text-slate-500">{label}</p>
       <p className="text-2xl font-bold text-slate-900">{value}</p>
     </article>

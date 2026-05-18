@@ -66,7 +66,7 @@ export function DirectivePanel({ directives, canAck, canPublish }: Props) {
         <div className="mb-6">
           <Link
             href="/directives/new"
-            className="inline-block rounded-lg bg-[#00529b] px-4 py-2 text-sm font-medium text-white hover:bg-[#003d73]"
+            className="btn-primary px-4 py-2 text-sm"
           >
             + Publish directive
           </Link>
@@ -74,24 +74,24 @@ export function DirectivePanel({ directives, canAck, canPublish }: Props) {
       )}
 
       {error && (
-        <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+        <p className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{error}</p>
       )}
       {message && (
-        <p className="mb-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+        <p className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
           {message}
         </p>
       )}
 
       <div className="space-y-4">
         {directives.length === 0 ? (
-          <p className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
+          <p className="polished-card rounded-[1.5rem] p-8 text-center text-slate-500">
             No directives published yet.
           </p>
         ) : (
           directives.map((d) => (
             <article
               key={d.id}
-              className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+              className="polished-card hover-lift rounded-[1.5rem] p-5"
             >
               <header className="flex flex-wrap items-start justify-between gap-2">
                 <div>
@@ -122,7 +122,7 @@ export function DirectivePanel({ directives, canAck, canPublish }: Props) {
                           type="checkbox"
                           checked={confirmRead}
                           onChange={(e) => setConfirmRead(e.target.checked)}
-                          className="mt-1"
+                          className="mt-1 accent-[var(--primary)]"
                         />
                         <span>
                           I confirm this branch has read and will comply with this directive.
@@ -132,7 +132,7 @@ export function DirectivePanel({ directives, canAck, canPublish }: Props) {
                         type="button"
                         disabled={loading}
                         onClick={() => acknowledge(d.id)}
-                        className="rounded-lg bg-[#00529b] px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                        className="btn-primary px-4 py-2 text-sm disabled:opacity-50"
                       >
                         Confirm acknowledgment
                       </button>

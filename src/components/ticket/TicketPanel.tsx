@@ -103,7 +103,7 @@ export function TicketPanel({
           <button
             type="button"
             onClick={() => setShowForm(!showForm)}
-            className="rounded-lg bg-[#00529b] px-4 py-2 text-sm font-medium text-white"
+            className="btn-primary px-4 py-2 text-sm"
           >
             + New request
           </button>
@@ -111,13 +111,13 @@ export function TicketPanel({
       </div>
 
       {error && (
-        <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+        <p className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{error}</p>
       )}
 
       {showForm && canCreate && (
         <form
           onSubmit={createTicket}
-          className="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+          className="polished-card reveal-up mb-8 rounded-[1.5rem] p-6"
         >
           <h2 className="mb-4 font-semibold">New service request</h2>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -126,7 +126,7 @@ export function TicketPanel({
               <select
                 value={form.category}
                 onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+                className="field-control mt-1"
               >
                 {TICKET_CATEGORIES.map((c) => (
                   <option key={c} value={c}>
@@ -140,7 +140,7 @@ export function TicketPanel({
               <select
                 value={form.priority}
                 onChange={(e) => setForm((f) => ({ ...f, priority: e.target.value }))}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+                className="field-control mt-1"
               >
                 {TICKET_PRIORITIES.map((p) => (
                   <option key={p} value={p}>
@@ -156,7 +156,7 @@ export function TicketPanel({
               required
               value={form.title}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+              className="field-control mt-1"
             />
           </label>
           <label className="mt-4 block text-sm">
@@ -167,13 +167,13 @@ export function TicketPanel({
               rows={3}
               value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+              className="field-control mt-1"
             />
           </label>
           <button
             type="submit"
             disabled={loading}
-            className="mt-4 rounded-lg bg-[#00529b] px-4 py-2 text-sm text-white disabled:opacity-50"
+            className="btn-primary mt-4 px-4 py-2 text-sm disabled:opacity-50"
           >
             Submit
           </button>
@@ -182,14 +182,14 @@ export function TicketPanel({
 
       <div className="space-y-3">
         {tickets.length === 0 ? (
-          <p className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
+          <p className="polished-card rounded-[1.5rem] p-8 text-center text-slate-500">
             No tickets yet.
           </p>
         ) : (
           tickets.map((t) => (
             <article
               key={t.id}
-              className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+              className="polished-card hover-lift rounded-[1.5rem] p-4"
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>

@@ -7,7 +7,15 @@ import { getTodayEod } from "@/lib/eod/service";
 import { countOpenIncidentsForBranch } from "@/lib/incident/service";
 import { countOverdueAcksForBranch } from "@/lib/directive/service";
 import { prisma } from "@/lib/prisma";
-import { Building2, FileText, AlertTriangle, Megaphone, Ticket } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  Building2,
+  FileText,
+  Megaphone,
+  Sparkles,
+  Ticket,
+} from "lucide-react";
 
 export default async function DashboardPage() {
   const session = await getServerSession();
@@ -92,27 +100,47 @@ export default async function DashboardPage() {
       user={session}
       branchLabel={branch ? `${branch.name} (${branch.branchCode})` : null}
     >
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">
-          Good day, {session.name.split(" ")[0]}
-        </h1>
-        <p className="text-slate-500">Branch operations dashboard</p>
+      <div className="glass-card mb-8 overflow-hidden rounded-[2rem] p-7">
+        <div className="flex flex-wrap items-start justify-between gap-6">
+          <div>
+            <p className="page-kicker">Branch Workspace</p>
+            <h1 className="mt-3 text-4xl font-black">
+              Good day, {session.name.split(" ")[0]}
+            </h1>
+            <p className="mt-2 max-w-2xl text-slate-600">
+              Your branch operations cockpit for today’s reporting, exceptions,
+              service requests, and Head Office communication.
+            </p>
+          </div>
+          <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-2xl shadow-slate-950/10">
+            <div className="flex items-center gap-3">
+              <Sparkles className="h-5 w-5 text-blue-200" />
+              <p className="text-sm font-bold">Live branch view</p>
+            </div>
+            <p className="mt-2 text-xs text-white/60">
+              {branch ? `${branch.name} · ${branch.branchCode}` : "No branch assigned"}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* grid */}
-      <section className="grid gap-4 sm:grid-cols-2">
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((c) => (
           <Link
             key={c.title}
             href={c.href}
-            className={`rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-[#00529b]/30 ${!c.live ? "pointer-events-none opacity-80" : ""}`}
+            className={`polished-card hover-lift rounded-3xl p-5 ${!c.live ? "pointer-events-none opacity-80" : ""}`}
           >
-            <header className="mb-2 flex items-center gap-2">
-              <c.icon className="h-5 w-5 text-[#00529b]" />
-              <h2 className="font-semibold">{c.title}</h2>
+            <header className="mb-5 flex items-center justify-between gap-2">
+              <span className="rounded-2xl bg-blue-50 p-3 text-[var(--primary)]">
+                <c.icon className="h-5 w-5" />
+              </span>
+              <ArrowRight className="h-4 w-4 text-slate-300" />
             </header>
-            <p className="text-sm text-slate-500">{c.desc}</p>
-            <p className={`mt-2 text-xs font-medium ${c.statusColor ?? "text-amber-700"}`}>
+            <h2 className="font-black text-slate-950">{c.title}</h2>
+            <p className="mt-1 text-sm text-slate-500">{c.desc}</p>
+            <p className={`mt-4 text-xs font-black uppercase tracking-wide ${c.statusColor ?? "text-amber-700"}`}>
               {c.status}
             </p>
           </Link>
@@ -120,7 +148,7 @@ export default async function DashboardPage() {
       </section>
 
       {branch && (
-        <p className="mt-6 flex items-center gap-2 text-sm text-slate-600">
+        <p className="mt-6 flex items-center gap-2 rounded-2xl border border-blue-100 bg-white/70 px-4 py-3 text-sm font-medium text-slate-600 shadow-sm">
           <Building2 className="h-4 w-4" />
           {branch.isSmartBranch ? "Smart Branch" : "Branch"} · {branch.district ?? "—"}
         </p>

@@ -26,14 +26,14 @@ export default async function AuditPage() {
         {canExport && (
           <Link
             href="/api/audit?format=csv"
-            className="rounded-lg border border-[#00529b] px-4 py-2 text-sm font-medium text-[#00529b]"
+            className="btn-secondary px-4 py-2 text-sm"
           >
             Export CSV
           </Link>
         )}
       </header>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="polished-card overflow-hidden rounded-[1.5rem]">
         <table className="w-full text-left text-sm">
           <thead className="border-b bg-slate-50 text-xs uppercase text-slate-500">
             <tr>

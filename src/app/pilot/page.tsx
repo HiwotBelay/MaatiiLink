@@ -39,7 +39,7 @@ export default async function PilotPage() {
       </header>
 
       {pilotBranches.length > 0 && (
-        <section className="mb-8 rounded-xl border border-[#00529b]/20 bg-blue-50 p-4 text-sm">
+        <section className="polished-card mb-8 rounded-[1.5rem] p-5 text-sm">
           <p className="font-medium text-[#00529b]">Pilot branches</p>
           <ul className="mt-2 list-inside list-disc text-slate-700">
             {pilotBranches.map((b) => (

@@ -42,7 +42,7 @@ export function AdminConsole({ initialUsers, initialBranches }: Props) {
 
   return (
     <div>
-      <div className="mb-6 flex gap-2 border-b border-slate-200">
+      <div className="mb-6 inline-flex gap-2 rounded-full border border-slate-200 bg-white/80 p-1 shadow-sm">
         <TabButton active={tab === "users"} onClick={() => setTab("users")}>
           Users
         </TabButton>
@@ -101,10 +101,10 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
-      className={`border-b-2 px-4 py-2 text-sm font-medium ${
+      className={`rounded-full px-4 py-2 text-sm font-bold ${
         active
-          ? "border-[#00529b] text-[#00529b]"
-          : "border-transparent text-slate-500 hover:text-slate-700"
+          ? "bg-[var(--primary)] text-white shadow-sm"
+          : "text-slate-500 hover:bg-blue-50 hover:text-[var(--primary)]"
       }`}
     >
       {children}
@@ -126,7 +126,7 @@ function UserSection({
   return (
     <div>
       <form
-        className="mb-8 rounded-xl border border-slate-200 bg-white p-4"
+        className="polished-card mb-8 rounded-[1.5rem] p-5"
         onSubmit={async (e) => {
           e.preventDefault();
           onError("");
@@ -157,14 +157,14 @@ function UserSection({
             name="name"
             required
             placeholder="Full name"
-            className="rounded border px-3 py-2 text-sm"
+            className="field-control"
           />
           <input
             name="email"
             type="email"
             required
             placeholder="email@coopbank.et"
-            className="rounded border px-3 py-2 text-sm"
+            className="field-control"
           />
           <input
             name="password"
@@ -172,16 +172,16 @@ function UserSection({
             required
             minLength={12}
             placeholder="Min 12 characters"
-            className="rounded border px-3 py-2 text-sm"
+            className="field-control"
           />
-          <select name="role" required className="rounded border px-3 py-2 text-sm">
+          <select name="role" required className="field-control">
             {ROLES.map((r) => (
               <option key={r} value={r}>
                 {r.replace(/_/g, " ")}
               </option>
             ))}
           </select>
-          <select name="branchId" className="rounded border px-3 py-2 text-sm sm:col-span-2">
+          <select name="branchId" className="field-control sm:col-span-2">
             <option value="">— No branch (HO roles) —</option>
             {branches.map((b) => (
               <option key={b.id} value={b.id}>
@@ -192,13 +192,13 @@ function UserSection({
         </div>
         <button
           type="submit"
-          className="mt-3 rounded-lg bg-[#00529b] px-4 py-2 text-sm text-white"
+          className="btn-primary mt-3 px-4 py-2 text-sm"
         >
           Create user
         </button>
       </form>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="polished-card overflow-hidden rounded-[1.5rem]">
         <table className="w-full text-left text-sm">
           <thead className="border-b bg-slate-50 text-xs uppercase text-slate-500">
             <tr>
@@ -256,7 +256,7 @@ function BranchSection({
   return (
     <div>
       <form
-        className="mb-8 rounded-xl border border-slate-200 bg-white p-4"
+        className="polished-card mb-8 rounded-[1.5rem] p-5"
         onSubmit={async (e) => {
           e.preventDefault();
           onError("");
@@ -289,16 +289,16 @@ function BranchSection({
             required
             pattern="[A-Z0-9]+"
             placeholder="Branch code e.g. AD001"
-            className="rounded border px-3 py-2 text-sm uppercase"
+            className="field-control uppercase"
           />
           <input
             name="name"
             required
             placeholder="Branch name"
-            className="rounded border px-3 py-2 text-sm"
+            className="field-control"
           />
-          <input name="district" placeholder="District" className="rounded border px-3 py-2 text-sm" />
-          <input name="region" placeholder="Region" className="rounded border px-3 py-2 text-sm" />
+          <input name="district" placeholder="District" className="field-control" />
+          <input name="region" placeholder="Region" className="field-control" />
         </div>
         <label className="mt-3 flex items-center gap-2 text-sm">
           <input type="checkbox" name="isSmartBranch" /> Smart branch
@@ -308,13 +308,13 @@ function BranchSection({
         </label>
         <button
           type="submit"
-          className="mt-3 rounded-lg bg-[#00529b] px-4 py-2 text-sm text-white"
+          className="btn-primary mt-3 px-4 py-2 text-sm"
         >
           Create branch
         </button>
       </form>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="polished-card overflow-hidden rounded-[1.5rem]">
         <table className="w-full text-left text-sm">
           <thead className="border-b bg-slate-50 text-xs uppercase text-slate-500">
             <tr>

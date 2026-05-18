@@ -19,7 +19,7 @@ export function MaatiiLinkLogo({
 
   const img = (
     <Image
-      src="/maatiilink-logo.png"
+      src="/maatiilink-logo.svg"
       alt="MaatiiLink"
       width={width}
       height={height}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Role } from "@prisma/client";
+import { ShieldCheck } from "lucide-react";
 import { MaatiiLinkLogo } from "@/components/brand/MaatiiLinkLogo";
 import { LogoutButton } from "./LogoutButton";
 import { ProductionBanner } from "./ProductionBanner";
@@ -68,37 +69,40 @@ export function AppShell({ user, branchLabel, children }: AppShellProps) {
   ].filter((n) => n.show);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="app-bg min-h-screen">
       <ProductionBanner />
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-3">
-          <div className="flex items-center gap-6">
+      <header className="sticky top-0 z-40 border-b border-white/70 bg-white/78 shadow-sm shadow-slate-950/5 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
+          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-5">
             <MaatiiLinkLogo href="/dashboard" height={36} priority />
-            <nav className="flex gap-4 text-sm">
+            <nav className="flex max-w-full gap-2 overflow-x-auto rounded-full border border-slate-200/80 bg-white/75 p-1 text-sm shadow-sm">
               {nav.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="text-slate-600 hover:text-[#00529b]"
+                  className="whitespace-nowrap rounded-full px-3 py-1.5 font-semibold text-slate-600 hover:bg-blue-50 hover:text-[var(--primary)]"
                 >
                   {item.label}
                 </Link>
               ))}
             </nav>
           </div>
-          <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-3 text-sm">
             <div className="text-right">
-              <p className="font-medium text-slate-800">{user.name}</p>
+              <p className="font-bold text-slate-900">{user.name}</p>
               <p className="text-xs text-slate-500">
                 {user.role.replace(/_/g, " ")}
                 {branchLabel ? ` · ${branchLabel}` : ""}
               </p>
             </div>
+            <div className="hidden rounded-2xl bg-blue-50 p-2 text-[var(--primary)] sm:block">
+              <ShieldCheck className="h-5 w-5" />
+            </div>
             <LogoutButton />
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+      <main className="reveal-up mx-auto max-w-7xl px-4 py-8 sm:px-6">{children}</main>
     </div>
   );
 }

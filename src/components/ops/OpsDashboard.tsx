@@ -22,7 +22,7 @@ export function OpsDashboard({ initial }: { initial: OpsStatus }) {
         />
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6">
+      <section className="polished-card rounded-[1.5rem] p-6">
         <h2 className="mb-4 text-lg font-semibold">Environment checks</h2>
         <ul className="space-y-2 text-sm">
           <CheckRow label="DATABASE_URL" status={env.checks.databaseUrl} />
@@ -39,7 +39,7 @@ export function OpsDashboard({ initial }: { initial: OpsStatus }) {
         )}
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6">
+      <section className="polished-card rounded-[1.5rem] p-6">
         <h2 className="mb-4 text-lg font-semibold">National rollout</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Stat label="Total branches" value={String(initial.counts.branches)} />
@@ -71,7 +71,7 @@ function Stat({
 }) {
   return (
     <article
-      className={`rounded-xl border p-4 ${
+      className={`rounded-3xl border p-4 shadow-sm ${
         ok === undefined
           ? "border-slate-200 bg-white"
           : ok

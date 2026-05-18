@@ -99,7 +99,7 @@ export function EodForm({ initial, readOnly = false, canSubmit = false, pastCuto
   }
 
   return (
-    <div className="space-y-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="polished-card space-y-6 rounded-[1.75rem] p-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 className="text-lg font-semibold">End of day report</h2>
@@ -109,16 +109,16 @@ export function EodForm({ initial, readOnly = false, canSubmit = false, pastCuto
       </div>
 
       {pastCutoff && form.status === "DRAFT" && (
-        <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
+        <p className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
           Past 18:00 Addis Ababa cutoff — please submit as soon as possible.
         </p>
       )}
 
       {error && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">{error}</p>
+        <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800">{error}</p>
       )}
       {message && (
-        <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">{message}</p>
+        <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">{message}</p>
       )}
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -195,7 +195,7 @@ export function EodForm({ initial, readOnly = false, canSubmit = false, pastCuto
             type="button"
             disabled={loading}
             onClick={saveDraft}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-50 disabled:opacity-50"
+            className="btn-secondary px-4 py-2 text-sm disabled:opacity-50"
           >
             Save draft
           </button>
@@ -204,7 +204,7 @@ export function EodForm({ initial, readOnly = false, canSubmit = false, pastCuto
               type="button"
               disabled={loading || !form.openingCashBand || !form.closingCashBand}
               onClick={submitReport}
-              className="rounded-lg bg-[#00529b] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+              className="btn-primary px-4 py-2 text-sm disabled:opacity-50"
             >
               Submit EOD
             </button>
@@ -234,7 +234,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 const inputClass =
-  "w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-[#00529b] focus:outline-none focus:ring-1 focus:ring-[#00529b] disabled:bg-slate-100";
+  "field-control disabled:bg-slate-100";
 
 function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {

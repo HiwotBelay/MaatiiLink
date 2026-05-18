@@ -33,7 +33,7 @@ export function ComplianceTable({ rows }: Props) {
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className="polished-card overflow-hidden rounded-[1.5rem]">
       <table className="w-full text-left text-sm">
         <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
           <tr>
@@ -78,7 +78,7 @@ export function ComplianceTable({ rows }: Props) {
                     type="button"
                     disabled={loadingId === r.reportId}
                     onClick={() => lockReport(r.reportId!)}
-                    className="text-sm font-medium text-[#00529b] hover:underline disabled:opacity-50"
+                    className="text-sm font-bold text-[var(--primary)] hover:underline disabled:opacity-50"
                   >
                     Lock EOD
                   </button>

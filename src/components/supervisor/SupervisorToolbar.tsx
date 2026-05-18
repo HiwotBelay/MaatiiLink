@@ -18,12 +18,12 @@ export function SupervisorToolbar({ districts, regions }: Props) {
   }
 
   return (
-    <div className="mb-6 flex flex-wrap items-end gap-4 rounded-xl border border-slate-200 bg-white p-4">
+    <div className="polished-card mb-6 flex flex-wrap items-end gap-4 rounded-[1.5rem] p-4">
       <label className="text-sm">
         <span className="text-slate-600">District</span>
         <select
           id="filter-district"
-          className="mt-1 block rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="field-control mt-1 block w-auto min-w-40"
           defaultValue=""
         >
           <option value="">All</option>
@@ -38,7 +38,7 @@ export function SupervisorToolbar({ districts, regions }: Props) {
         <span className="text-slate-600">Region</span>
         <select
           id="filter-region"
-          className="mt-1 block rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="field-control mt-1 block w-auto min-w-40"
           defaultValue=""
         >
           <option value="">All</option>
@@ -52,7 +52,7 @@ export function SupervisorToolbar({ districts, regions }: Props) {
       <button
         type="button"
         onClick={exportCsv}
-        className="rounded-lg bg-[#00529b] px-4 py-2 text-sm font-medium text-white"
+        className="btn-primary px-4 py-2 text-sm"
       >
         Export CSV
       </button>

@@ -10,7 +10,7 @@ import {
 } from "@/lib/rbac";
 import { isCsrfSafe } from "@/lib/security/csrf";
 
-const PUBLIC_UI = ["/", "/login"];
+const PUBLIC_UI = ["/", "/login", "/signup"];
 
 async function getSession(request: NextRequest) {
   const token = request.cookies.get(SESSION_COOKIE)?.value;
@@ -21,6 +21,10 @@ async function getSession(request: NextRequest) {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const session = await getSession(request);
+
+  if (!pathname.startsWith("/api") && /\.[^/]+$/.test(pathname)) {
+    return NextResponse.next();
+  }
 
   if (pathname.startsWith("/api")) {
     if (!isCsrfSafe(request)) {
@@ -38,7 +42,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (pathname === "/login") {
+  if (pathname === "/login" || pathname === "/signup") {
     if (session) {
       return NextResponse.redirect(
         new URL(defaultRouteForRole(session.role), request.url),

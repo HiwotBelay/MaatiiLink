@@ -46,11 +46,11 @@ export function DirectivePublishForm() {
   return (
     <form
       onSubmit={submit}
-      className="max-w-2xl rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+      className="polished-card max-w-2xl rounded-[1.5rem] p-6"
     >
       <h2 className="mb-4 text-lg font-semibold">Publish HO directive</h2>
       {error && (
-        <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+        <p className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{error}</p>
       )}
       <label className="block text-sm">
         <span className="text-slate-600">Title</span>
@@ -58,7 +58,7 @@ export function DirectivePublishForm() {
           required
           value={form.title}
           onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-          className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+          className="field-control mt-1"
         />
       </label>
       <label className="mt-4 block text-sm">
@@ -69,7 +69,7 @@ export function DirectivePublishForm() {
           rows={10}
           value={form.body}
           onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))}
-          className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+          className="field-control mt-1"
         />
       </label>
       <label className="mt-4 flex items-center gap-2 text-sm">
@@ -86,13 +86,13 @@ export function DirectivePublishForm() {
           type="date"
           value={form.deadlineAt}
           onChange={(e) => setForm((f) => ({ ...f, deadlineAt: e.target.value }))}
-          className="mt-1 rounded-lg border border-slate-300 px-3 py-2"
+          className="field-control mt-1 w-auto"
         />
       </label>
       <button
         type="submit"
         disabled={loading}
-        className="mt-6 rounded-lg bg-[#00529b] px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+        className="btn-primary mt-6 px-4 py-2 text-sm disabled:opacity-50"
       >
         Publish
       </button>

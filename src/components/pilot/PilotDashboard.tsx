@@ -95,7 +95,7 @@ function KpiCard({
 }) {
   return (
     <article
-      className={`rounded-xl border p-4 shadow-sm ${
+      className={`rounded-3xl border p-4 shadow-sm ${
         met ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"
       }`}
     >
@@ -109,7 +109,7 @@ function KpiCard({
 function FeedbackForm() {
   return (
     <form
-      className="rounded-xl border border-slate-200 bg-white p-4"
+      className="polished-card rounded-[1.5rem] p-5"
       onSubmit={async (e) => {
         e.preventDefault();
         const fd = new FormData(e.currentTarget);
@@ -130,14 +130,14 @@ function FeedbackForm() {
     >
       <h3 className="mb-3 font-semibold">Submit pilot feedback</h3>
       <div className="grid gap-3 sm:grid-cols-2">
-        <select name="category" className="rounded border px-2 py-2 text-sm" required>
+        <select name="category" className="field-control" required>
           <option value="BUG">Bug</option>
           <option value="UX">UX</option>
           <option value="TRAINING">Training</option>
           <option value="FEATURE">Feature request</option>
           <option value="OTHER">Other</option>
         </select>
-        <select name="severity" className="rounded border px-2 py-2 text-sm" required>
+        <select name="severity" className="field-control" required>
           <option value="LOW">Low</option>
           <option value="MEDIUM">Medium</option>
           <option value="HIGH">High</option>
@@ -150,11 +150,11 @@ function FeedbackForm() {
         minLength={10}
         rows={3}
         placeholder="Describe the issue or suggestion…"
-        className="mt-3 w-full rounded border px-3 py-2 text-sm"
+        className="field-control mt-3"
       />
       <button
         type="submit"
-        className="mt-3 rounded-lg bg-[#00529b] px-4 py-2 text-sm text-white"
+        className="btn-primary mt-3 px-4 py-2 text-sm"
       >
         Submit feedback
       </button>
@@ -176,7 +176,7 @@ function FeedbackList({
   return (
     <ul className="space-y-3">
       {feedback.map((f) => (
-        <li key={f.id} className="rounded-lg border border-slate-200 bg-white p-4 text-sm">
+        <li key={f.id} className="polished-card hover-lift rounded-[1.25rem] p-4 text-sm">
           <div className="flex flex-wrap justify-between gap-2">
             <span className="font-medium">
               {f.category} · {f.severity}
