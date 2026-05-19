@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { EodForm } from "@/components/eod/EodForm";
 import { EodHistory } from "@/components/eod/EodHistory";
 import { getServerSession } from "@/lib/auth/server";
@@ -75,10 +76,7 @@ export default async function EodPage({ searchParams }: PageProps) {
 
   return (
     <AppShell user={session}>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">End of day reporting</h1>
-        <p className="text-slate-500">Digital EOD for your branch</p>
-      </div>
+      <PageHeader title="End of day reporting" description="Digital EOD for your branch" />
 
       <div className="mb-10">
         <EodForm

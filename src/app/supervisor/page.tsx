@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Home } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { StatCard } from "@/components/layout/StatCard";
 import { ComplianceTable } from "@/components/supervisor/ComplianceTable";
 import { SupervisorToolbar } from "@/components/supervisor/SupervisorToolbar";
 import { prisma } from "@/lib/prisma";
@@ -33,12 +36,16 @@ export default async function SupervisorPage() {
 
   return (
     <AppShell user={session}>
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Supervisor dashboard</h1>
-        <p className="text-slate-500">
-          Branch compliance — {getAddisDateString()} (Addis Ababa)
-        </p>
-      </header>
+      <PageHeader
+        title="Supervisor dashboard"
+        description={`Branch compliance · ${getAddisDateString()} (Addis Ababa)`}
+        actions={
+          <Link href="/" className="btn-secondary px-3 py-2 text-sm">
+            <Home className="h-4 w-4" />
+            Back to home
+          </Link>
+        }
+      />
 
       {totalCriticalOpen > 0 && (
         <div className="mb-6 rounded-[1.5rem] border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-900 shadow-sm">
@@ -56,12 +63,28 @@ export default async function SupervisorPage() {
         </div>
       )}
 
-      <section className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <section className="dashboard-stat-grid mb-6 lg:grid-cols-5">
         <StatCard label="Branches" value={String(rows.length)} />
-        <StatCard label="EOD submitted" value={String(onTime)} />
-        <StatCard label="Missing / late EOD" value={String(missing)} />
-        <StatCard label="Critical incidents" value={String(totalCriticalOpen)} />
-        <StatCard label="Overdue directive acks" value={String(totalOverdueAcks)} />
+        <StatCard
+          label="EOD submitted"
+          value={String(onTime)}
+          tone="success"
+        />
+        <StatCard
+          label="Missing / late EOD"
+          value={String(missing)}
+          tone={missing > 0 ? "warning" : "default"}
+        />
+        <StatCard
+          label="Critical incidents"
+          value={String(totalCriticalOpen)}
+          tone={totalCriticalOpen > 0 ? "danger" : "success"}
+        />
+        <StatCard
+          label="Overdue directive acks"
+          value={String(totalOverdueAcks)}
+          tone={totalOverdueAcks > 0 ? "danger" : "success"}
+        />
       </section>
 
       <section className="mb-8 flex flex-wrap gap-4 text-sm">
@@ -81,18 +104,11 @@ export default async function SupervisorPage() {
       <SupervisorToolbar districts={districts} regions={regions} />
 
       <section>
-        <h2 className="mb-4 text-lg font-semibold">Branch compliance</h2>
+        <h2 className="mb-4 text-base font-semibold text-[var(--foreground)]">
+          Branch compliance
+        </h2>
         <ComplianceTable rows={rows} />
       </section>
     </AppShell>
-  );
-}
-
-function StatCard({ label, value }: { label: string; value: string }) {
-  return (
-    <article className="polished-card hover-lift rounded-3xl p-4">
-      <p className="text-xs uppercase text-slate-500">{label}</p>
-      <p className="text-2xl font-bold text-slate-900">{value}</p>
-    </article>
   );
 }
