@@ -52,11 +52,6 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname === "/") {
-    if (session) {
-      return NextResponse.redirect(
-        new URL(defaultRouteForRole(session.role), request.url),
-      );
-    }
     return NextResponse.next();
   }
 
