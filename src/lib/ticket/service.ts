@@ -27,6 +27,15 @@ function resolveBranchId(user: { role: Role; branchId: string | null }) {
   return user.branchId;
 }
 
+export async function countOpenTicketsForBranch(branchId: string) {
+  return prisma.serviceTicket.count({
+    where: {
+      branchId,
+      status: { in: ["OPEN", "IN_PROGRESS"] },
+    },
+  });
+}
+
 export async function listTickets(user: { role: Role; branchId: string | null }) {
   const canViewAll = hasPermission(user.role, Permission.TICKET_VIEW_ALL);
   const branchId = canViewAll ? undefined : resolveBranchId(user);
