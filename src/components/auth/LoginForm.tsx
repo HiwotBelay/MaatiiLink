@@ -53,21 +53,18 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
+    <form onSubmit={onSubmit} className="auth-form space-y-5">
       {error && (
-        <div
-          role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800"
-        >
+        <div role="alert" className="auth-error">
           {error}
         </div>
       )}
       <div>
-        <label htmlFor="email" className="mb-2 block text-sm font-bold text-slate-700">
+        <label htmlFor="email" className="auth-label">
           Work email
         </label>
-        <div className="relative">
-          <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <div className="auth-input-wrap">
+          <Mail className="auth-input-icon" />
           <input
             id="email"
             type="email"
@@ -75,17 +72,17 @@ export function LoginForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="field-control pl-10"
-            placeholder="manager@maatiilink.local"
+            className="auth-input"
+            placeholder="youremail@gmail.com"
           />
         </div>
       </div>
       <div>
-        <label htmlFor="password" className="mb-2 block text-sm font-bold text-slate-700">
+        <label htmlFor="password" className="auth-label">
           Password
         </label>
-        <div className="relative">
-          <ShieldCheck className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <div className="auth-input-wrap">
+          <ShieldCheck className="auth-input-icon" />
           <input
             id="password"
             type={showPassword ? "text" : "password"}
@@ -93,12 +90,12 @@ export function LoginForm() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="field-control px-10"
+            className="auth-input auth-input-password"
           />
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[var(--primary)]"
+            className="auth-input-toggle"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -108,7 +105,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="btn-primary w-full px-5 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+        className="btn-primary auth-glow-btn w-full px-5 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? (
           <>
