@@ -1,5 +1,6 @@
 "use client";
 
+import { GlitchText } from "./GlitchText";
 import { TrueFocus } from "./TrueFocus";
 
 const HERO_SENTENCE =
@@ -8,7 +9,18 @@ const HERO_SENTENCE =
 export function HomeHero() {
   return (
     <section className="landing-hero-focus" aria-label="MaatiiLink introduction">
-      <h1 className="landing-title">MaatiiLink</h1>
+      <div className="landing-glitch-wrap">
+        <GlitchText
+          as="h1"
+          shadowDurationA="7s"
+          shadowDurationB="8.5s"
+          enableOnHover
+          className="landing-glitch-title"
+        >
+          MaatiiLink
+        </GlitchText>
+        
+      </div>
       <p className="landing-subtitle mx-auto">
         Branch-to-Head Office operations — EOD, incidents, directives, and
         internal service requests in one workspace.

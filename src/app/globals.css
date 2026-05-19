@@ -1464,6 +1464,151 @@ html[data-theme="light"] .auth-back-home:hover {
   letter-spacing: -0.04em;
 }
 
+/* Glitch text — soft shadow drift on hover (MaatiiLink theme) */
+@keyframes glitch-shadow-drift-a {
+  0%,
+  100% {
+    transform: translate(-2px, 1px);
+    opacity: 0.28;
+  }
+  50% {
+    transform: translate(-5px, 2px);
+    opacity: 0.42;
+  }
+}
+
+@keyframes glitch-shadow-drift-b {
+  0%,
+  100% {
+    transform: translate(2px, -1px);
+    opacity: 0.22;
+  }
+  50% {
+    transform: translate(5px, -2px);
+    opacity: 0.38;
+  }
+}
+
+.glitch-text {
+  position: relative;
+  isolation: isolate;
+  display: inline-block;
+  margin-inline: auto;
+  font-weight: 900;
+  color: var(--foreground);
+  user-select: none;
+}
+
+.glitch-text-hover {
+  cursor: pointer;
+  outline: none;
+  transition: text-shadow 420ms ease;
+}
+
+.glitch-text-hover:hover,
+.glitch-text-hover:focus-visible {
+  text-shadow:
+    0 0 20px rgba(0, 210, 255, 0.18),
+    0 2px 12px rgba(0, 82, 155, 0.12);
+}
+
+.glitch-text-hover:focus-visible {
+  border-radius: 0.25rem;
+  box-shadow: 0 0 0 2px rgba(0, 82, 155, 0.35);
+}
+
+.glitch-text::before,
+.glitch-text::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  overflow: visible;
+  white-space: nowrap;
+  content: attr(data-text);
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0;
+  filter: blur(0.6px);
+  transition: opacity 480ms ease;
+}
+
+.glitch-text::before {
+  color: rgba(0, 210, 255, 0.55);
+  text-shadow: 0 0 12px rgba(0, 210, 255, 0.35);
+}
+
+.glitch-text::after {
+  color: rgba(0, 82, 155, 0.45);
+  text-shadow: 0 0 10px rgba(0, 82, 155, 0.28);
+}
+
+.glitch-text-active::before {
+  opacity: 0.35;
+  animation: glitch-shadow-drift-a var(--shadow-duration-a, 6s) ease-in-out
+    infinite;
+}
+
+.glitch-text-active::after {
+  opacity: 0.3;
+  animation: glitch-shadow-drift-b var(--shadow-duration-b, 7.5s) ease-in-out
+    infinite;
+}
+
+.glitch-text-hover:hover::before,
+.glitch-text-hover:focus-visible::before {
+  opacity: 0.38;
+  animation: glitch-shadow-drift-a var(--shadow-duration-a, 6s) ease-in-out
+    infinite;
+}
+
+.glitch-text-hover:hover::after,
+.glitch-text-hover:focus-visible::after {
+  opacity: 0.32;
+  animation: glitch-shadow-drift-b var(--shadow-duration-b, 7.5s) ease-in-out
+    infinite;
+}
+
+.landing-glitch-title {
+  margin-top: 0.75rem;
+  font-size: clamp(2.25rem, 6vw, 3.25rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+
+.landing-glitch-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 0.25rem;
+}
+
+.landing-glitch-hint {
+  margin-top: 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  opacity: 0.65;
+  transition: opacity 180ms ease;
+  pointer-events: none;
+}
+
+.landing-glitch-wrap:has(.glitch-text-hover:hover) .landing-glitch-hint,
+.landing-glitch-wrap:has(.glitch-text-hover:focus-visible) .landing-glitch-hint {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glitch-text::before,
+  .glitch-text::after {
+    display: none;
+  }
+}
+
 .landing-subtitle {
   margin-top: 1rem;
   max-width: 28rem;
