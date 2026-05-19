@@ -107,12 +107,13 @@ export function IncidentPanel({
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <div>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="filter-toolbar">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="field-control inline-block w-auto min-w-36"
+            className="field-control"
+            aria-label="Filter by status"
           >
             <option value="">All statuses</option>
             {INCIDENT_STATUSES.map((s) => (
@@ -124,7 +125,8 @@ export function IncidentPanel({
           <select
             value={severityFilter}
             onChange={(e) => setSeverityFilter(e.target.value)}
-            className="field-control ml-2 inline-block w-auto min-w-36"
+            className="field-control"
+            aria-label="Filter by severity"
           >
             <option value="">All severities</option>
             {INCIDENT_SEVERITIES.map((s) => (
