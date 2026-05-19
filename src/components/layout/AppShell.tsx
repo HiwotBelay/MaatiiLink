@@ -14,9 +14,9 @@ type AppShellProps = {
 export function AppShell({ user, branchLabel, children }: AppShellProps) {
   return (
     <div className="app-layout">
-      <ProductionBanner />
       <AppSidebar user={user} branchLabel={branchLabel} />
       <div className="app-main">
+        <ProductionBanner />
         <header className="app-topbar">
           <Link href="/" className="app-topbar-home">
             <Home className="h-4 w-4" />

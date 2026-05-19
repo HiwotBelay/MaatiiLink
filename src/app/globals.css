@@ -950,6 +950,20 @@ main form textarea:focus {
   flex-direction: column;
   margin-left: 15.5rem;
   min-height: 100vh;
+  min-width: 0;
+}
+
+.app-production-banner {
+  flex-shrink: 0;
+  width: 100%;
+  border-bottom: 1px solid color-mix(in srgb, var(--primary) 35%, var(--border));
+  background: var(--primary-soft);
+  padding: 0.5rem 1.5rem;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--foreground);
 }
 
 .app-topbar {
