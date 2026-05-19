@@ -20,7 +20,7 @@ export function AppShell({ user, branchLabel, children }: AppShellProps) {
         <header className="app-topbar">
           <Link href="/" className="app-topbar-home">
             <Home className="h-4 w-4" />
-            Home
+            Back to home
           </Link>
           <UserMenu user={user} />
         </header>

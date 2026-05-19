@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, Home } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatCard } from "@/components/layout/StatCard";
@@ -85,12 +85,6 @@ export default async function DashboardPage() {
       <PageHeader
         title="Dashboard"
         description={`${getAddisDateString()} · ${branch?.name ?? "Branch"}`}
-        actions={
-          <Link href="/" className="btn-secondary px-3 py-2 text-sm">
-            <Home className="h-4 w-4" />
-            Back to home
-          </Link>
-        }
       />
 
       <section className="dashboard-stat-grid">

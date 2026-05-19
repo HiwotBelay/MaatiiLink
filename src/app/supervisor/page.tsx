@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Home } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatCard } from "@/components/layout/StatCard";
@@ -39,12 +38,6 @@ export default async function SupervisorPage() {
       <PageHeader
         title="Supervisor dashboard"
         description={`Branch compliance · ${getAddisDateString()} (Addis Ababa)`}
-        actions={
-          <Link href="/" className="btn-secondary px-3 py-2 text-sm">
-            <Home className="h-4 w-4" />
-            Back to home
-          </Link>
-        }
       />
 
       {totalCriticalOpen > 0 && (
