@@ -1,25 +1,12 @@
 import Link from "next/link";
-import {
-  Activity,
-  ArrowRight,
-  FileCheck2,
-  LayoutDashboard,
-  Megaphone,
-  TicketCheck,
-} from "lucide-react";
+import { ArrowRight, LayoutDashboard } from "lucide-react";
 import { MaatiiLinkLogo } from "@/components/brand/MaatiiLinkLogo";
 import { HomeHero } from "@/components/landing/HomeHero";
+import { ModuleSocialOrbit } from "@/components/landing/ModuleSocialOrbit";
 import { VenomBeamBackground } from "@/components/layout/VenomBeamBackground";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { getServerSession } from "@/lib/auth/server";
 import { defaultRouteForRole } from "@/lib/rbac";
-
-const modules = [
-  { title: "EOD", icon: FileCheck2 },
-  { title: "Incidents", icon: Activity },
-  { title: "Directives", icon: Megaphone },
-  { title: "Service desk", icon: TicketCheck },
-];
 
 export default async function HomePage() {
   const session = await getServerSession();
@@ -51,14 +38,7 @@ export default async function HomePage() {
         <main className="landing-main landing-main-wide reveal-up">
           <p className="page-kicker">Cooperative Bank of Oromia</p>
           <HomeHero />
-          <ul className="landing-modules">
-            {modules.map((m) => (
-              <li key={m.title} className="landing-module-chip">
-                <m.icon className="h-4 w-4 text-[var(--primary)]" />
-                {m.title}
-              </li>
-            ))}
-          </ul>
+          <ModuleSocialOrbit />
           <div className="landing-actions">
             {session ? (
               <>
