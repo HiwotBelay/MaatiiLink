@@ -15,12 +15,12 @@ const themeScript = `
     var s = localStorage.getItem(k);
     var t = s === "light" || s === "dark"
       ? s
-      : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      : "dark";
     document.documentElement.setAttribute("data-theme", t);
     document.documentElement.style.colorScheme = t;
   } catch (e) {
-    document.documentElement.setAttribute("data-theme", "light");
-    document.documentElement.style.colorScheme = "light";
+    document.documentElement.setAttribute("data-theme", "dark");
+    document.documentElement.style.colorScheme = "dark";
   }
 })();
 `;
@@ -31,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="light" suppressHydrationWarning>
+    <html lang="en" data-theme="dark" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
