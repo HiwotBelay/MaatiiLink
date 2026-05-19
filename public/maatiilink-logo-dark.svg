@@ -1,0 +1,13 @@
+<svg width="420" height="100" viewBox="0 0 420 100" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">MaatiiLink</title>
+  <desc id="desc">MaatiiLink wordmark for dark backgrounds.</desc>
+  <rect x="4" y="12" width="76" height="76" rx="20" fill="#00529B"/>
+  <path d="M42 24L66 38V44H18V38L42 24Z" fill="#FFFFFF"/>
+  <path d="M23 48H31V70H23V48Z" fill="#FFFFFF"/>
+  <path d="M38 48H46V70H38V48Z" fill="#FFFFFF"/>
+  <path d="M53 48H61V70H53V48Z" fill="#FFFFFF"/>
+  <path d="M18 74H66V80H18V74Z" fill="#FFFFFF"/>
+  <text x="98" y="58" fill="#E8F2FF" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="700" letter-spacing="-1.2">Maatii</text>
+  <text x="220" y="58" fill="#00D2FF" font-family="Arial, Helvetica, sans-serif" font-size="38" font-weight="700" letter-spacing="-1.2">Link</text>
+  <text x="100" y="80" fill="#8FA8C9" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" letter-spacing="1.8">COOP OPERATIONS BRIDGE</text>
+</svg>

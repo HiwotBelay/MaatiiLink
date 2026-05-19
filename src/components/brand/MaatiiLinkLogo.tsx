@@ -18,15 +18,27 @@ export function MaatiiLinkLogo({
   const width = Math.round(height * 4.2);
 
   const img = (
-    <Image
-      src="/maatiilink-logo.svg"
-      alt="MaatiiLink"
-      width={width}
-      height={height}
-      priority={priority}
-      className={`h-auto w-auto object-contain object-left ${className}`}
-      style={{ maxHeight: height, width: "auto" }}
-    />
+    <span className="brand-logo-wrap">
+      <Image
+        src="/maatiilink-logo.svg"
+        alt="MaatiiLink"
+        width={width}
+        height={height}
+        priority={priority}
+        className={`brand-logo-light h-auto w-auto object-contain object-left ${className}`}
+        style={{ maxHeight: height, width: "auto" }}
+      />
+      <Image
+        src="/maatiilink-logo-dark.svg"
+        alt=""
+        aria-hidden
+        width={width}
+        height={height}
+        priority={priority}
+        className={`brand-logo-dark h-auto w-auto object-contain object-left ${className}`}
+        style={{ maxHeight: height, width: "auto" }}
+      />
+    </span>
   );
 
   if (href) {
