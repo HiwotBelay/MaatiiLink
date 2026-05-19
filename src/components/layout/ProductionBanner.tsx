@@ -3,8 +3,7 @@ export function ProductionBanner() {
 
   return (
     <div role="status" className="app-production-banner">
-      Production environment — changes are audited. Report issues via Pilot
-      feedback or your supervisor.
+    
     </div>
   );
 }
