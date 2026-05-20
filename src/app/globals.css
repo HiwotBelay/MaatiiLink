@@ -1217,6 +1217,71 @@ main form textarea:focus {
   color: #059669;
 }
 
+/* Head Office panels — theme-aware (readable in light + dark) */
+.ho-card {
+  border-radius: 1.5rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-card);
+}
+
+.ho-card-kicker {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted-foreground);
+}
+
+.ho-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.ho-card-text {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+.ho-card-item-title {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.ho-card-item-meta {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.ho-card-link {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.ho-card-link:hover {
+  text-decoration: underline;
+}
+
+.ho-badge-missing {
+  display: inline-block;
+  margin-top: 0.25rem;
+  border-radius: 9999px;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(220, 38, 38, 0.15);
+  color: #fca5a5;
+}
+
+html[data-theme="light"] .ho-badge-missing {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 .dashboard-loading {
   display: flex;
   flex-direction: column;

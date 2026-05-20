@@ -9,7 +9,7 @@ import { EodAlertsPanel } from "@/components/eod/EodAlertsPanel";
 import { SupervisorToolbar } from "@/components/supervisor/SupervisorToolbar";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "@/lib/auth/server";
-import { hasPermission, Permission } from "@/lib/rbac";
+import { hasPermission, isHeadOfficeHomeRole, Permission } from "@/lib/rbac";
 import { getBranchComplianceSummary } from "@/lib/supervisor/compliance-summary";
 import { getAddisDateString } from "@/lib/eod/constants";
 
@@ -40,8 +40,12 @@ export default async function SupervisorPage() {
   return (
     <AppShell user={session}>
       <PageHeader
-        title="Supervisor dashboard"
-        description={`Branch compliance · ${getAddisDateString()} (Addis Ababa)`}
+        title={
+          isHeadOfficeHomeRole(session.role)
+            ? "National branch compliance"
+            : "Supervisor dashboard"
+        }
+        description={`Branch compliance · ${getAddisDateString()} (Addis Ababa / EAT)`}
       />
 
       {totalCriticalOpen > 0 && (

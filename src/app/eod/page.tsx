@@ -51,12 +51,15 @@ export default async function EodPage({ searchParams }: PageProps) {
   const session = await getServerSession();
   if (!session) redirect("/login");
 
-  if (!hasPermission(session.role, Permission.EOD_VIEW_BRANCH)) {
-    redirect(defaultRouteForRole(session.role));
+  if (
+    hasPermission(session.role, Permission.EOD_VIEW_ALL) &&
+    !hasPermission(session.role, Permission.EOD_VIEW_BRANCH)
+  ) {
+    redirect("/eod/oversight");
   }
 
-  if (hasPermission(session.role, Permission.EOD_VIEW_ALL)) {
-    redirect("/supervisor");
+  if (!hasPermission(session.role, Permission.EOD_VIEW_BRANCH)) {
+    redirect(defaultRouteForRole(session.role));
   }
 
   if (!session.branchId) {

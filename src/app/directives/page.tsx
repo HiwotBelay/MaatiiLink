@@ -48,7 +48,7 @@ export default async function DirectivesPage() {
     >
       <PageHeader
         title="Operational knowledge & procedures"
-        description="Internal banking SOPs, policies, and mandatory acknowledgment tracking"
+        description="Find the latest Head Office directives by area — search, category, or quick lookup. No phone calls to HO for routine procedures."
       />
 
       {showAnalytics && <KnowledgeAnalytics />}

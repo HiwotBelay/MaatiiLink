@@ -1,5 +1,6 @@
 import { PrismaClient, Role } from "@prisma/client";
 import { hash } from "bcryptjs";
+import { seedDirectives } from "./seed-directives";
 
 const prisma = new PrismaClient();
 
@@ -148,7 +149,7 @@ async function main() {
     },
   });
 
-  await prisma.user.upsert({
+  const hoOps = await prisma.user.upsert({
     where: { email: "hoops@maatiilink.local" },
     update: {},
     create: {
@@ -159,6 +160,8 @@ async function main() {
       branchId: hq.id,
     },
   });
+
+  const directiveCount = await seedDirectives(prisma, hoOps.id);
 
   console.log(
     "Seed complete:",
@@ -173,6 +176,7 @@ async function main() {
   console.log("  compliance@maatiilink.local / ChangeMe123!");
   console.log("  it@maatiilink.local / ChangeMe123!");
   console.log("  hoops@maatiilink.local / ChangeMe123!");
+  console.log(`  Knowledge base: ${directiveCount} new HO procedures seeded (by title)`);
 }
 
 main()

@@ -36,6 +36,8 @@ describe("rbac", () => {
   it("default routes by role", () => {
     expect(defaultRouteForRole("BRANCH_MANAGER")).toBe("/dashboard");
     expect(defaultRouteForRole("REGIONAL_SUPERVISOR")).toBe("/supervisor");
+    expect(defaultRouteForRole("HO_OPERATIONS")).toBe("/ho");
+    expect(defaultRouteForRole("SUPER_ADMIN")).toBe("/admin");
     expect(defaultRouteForRole("IT_SUPPORT")).toBe("/ops");
   });
 

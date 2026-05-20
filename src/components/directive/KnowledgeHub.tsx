@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   CATEGORY_LABELS,
   DIRECTIVE_CATEGORIES,
@@ -88,6 +88,21 @@ export function KnowledgeHub({
       setSearching(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (initialDirectives.length === 0) {
+      void runSearch({
+        q: "",
+        category: "",
+        critical: false,
+        recent: false,
+        mandatory: false,
+        sop: false,
+        unread: false,
+        pinned: false,
+      });
+    }
+  }, [initialDirectives.length, runSearch]);
 
   function applyFilters(patch: Partial<Filters>) {
     const next = { ...filters, ...patch };
@@ -301,7 +316,22 @@ export function KnowledgeHub({
             </h2>
             <div className="knowledge-results-list">
               {directives.length === 0 ? (
-                <p className="knowledge-empty">No matching procedures. Try another search or filter.</p>
+                <div className="knowledge-empty">
+                  <p>No procedures match your search.</p>
+                  <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+                    Try a category on the left, a quick lookup above, or clear filters.
+                    {canPublish && (
+                      <>
+                        {" "}
+                        Head Office can publish official circulars via{" "}
+                        <Link href="/directives/new" className="ho-card-link">
+                          Publish procedure
+                        </Link>
+                        .
+                      </>
+                    )}
+                  </p>
+                </div>
               ) : (
                 directives.map((d) => (
                   <article

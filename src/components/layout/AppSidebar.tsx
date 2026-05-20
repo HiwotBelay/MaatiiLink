@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import type { Role } from "@prisma/client";
 import {
   Activity,
+  Building2,
   ClipboardList,
   FileText,
   LayoutDashboard,
@@ -17,7 +18,12 @@ import {
 } from "lucide-react";
 import { MaatiiLinkLogo } from "@/components/brand/MaatiiLinkLogo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { hasPermission, Permission } from "@/lib/rbac";
+import {
+  defaultRouteForRole,
+  hasPermission,
+  isHeadOfficeHomeRole,
+  Permission,
+} from "@/lib/rbac";
 
 const ICONS = {
   dashboard: LayoutDashboard,
@@ -26,6 +32,7 @@ const ICONS = {
   directives: Megaphone,
   tickets: Ticket,
   supervisor: ClipboardList,
+  ho: Building2,
   pilot: Rocket,
   audit: Shield,
   admin: Users,
@@ -39,19 +46,35 @@ type Props = {
 
 export function AppSidebar({ user, branchLabel }: Props) {
   const pathname = usePathname();
+  const homeHref = defaultRouteForRole(user.role);
+  const isHo = isHeadOfficeHomeRole(user.role);
 
   const items = [
     {
       href: "/dashboard",
       label: "Dashboard",
       icon: "dashboard" as const,
-      show: !hasPermission(user.role, Permission.DASHBOARD_SUPERVISOR),
+      show:
+        !hasPermission(user.role, Permission.DASHBOARD_SUPERVISOR) && !isHo,
+    },
+    {
+      href: "/ho",
+      label: "Head Office",
+      icon: "ho" as const,
+      show: isHo,
     },
     {
       href: "/supervisor",
-      label: "Supervisor",
+      label: isHo ? "Branch compliance" : "Supervisor",
       icon: "supervisor" as const,
       show: hasPermission(user.role, Permission.DASHBOARD_SUPERVISOR),
+    },
+    {
+      href: "/eod/oversight",
+      label: "EOD oversight",
+      icon: "eod" as const,
+      show:
+        isHo && hasPermission(user.role, Permission.EOD_VIEW_ALL),
     },
     {
       href: "/eod",
@@ -118,10 +141,7 @@ export function AppSidebar({ user, branchLabel }: Props) {
   return (
     <aside className="app-sidebar">
       <div className="app-sidebar-inner">
-        <Link
-          href={items[0]?.href ?? "/dashboard"}
-          className="app-sidebar-brand"
-        >
+        <Link href={homeHref} className="app-sidebar-brand">
           <MaatiiLinkLogo height={34} />
         </Link>
 

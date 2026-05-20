@@ -150,17 +150,24 @@ export function requirePermission(role: Role, permission: PermissionKey): void {
 /** Post-login landing route per role. */
 export function defaultRouteForRole(role: Role): string {
   switch (role) {
-    case "REGIONAL_SUPERVISOR":
     case "HO_OPERATIONS":
+      return "/ho";
+    case "SUPER_ADMIN":
+      return "/admin";
+    case "REGIONAL_SUPERVISOR":
     case "COMPLIANCE_OFFICER":
     case "AUDITOR_READ_ONLY":
-    case "SUPER_ADMIN":
       return "/supervisor";
     case "IT_SUPPORT":
       return "/ops";
     default:
       return "/dashboard";
   }
+}
+
+/** Roles that use Head Office home (/ho) instead of supervisor dashboard. */
+export function isHeadOfficeHomeRole(role: Role): boolean {
+  return role === "HO_OPERATIONS" || role === "SUPER_ADMIN";
 }
 
 export const PUBLIC_API_PATHS = [
@@ -231,6 +238,12 @@ export function getApiRoutePermission(
 
 /** UI route access by path prefix. */
 export function canAccessUiRoute(role: Role, pathname: string): boolean {
+  if (pathname.startsWith("/ho")) {
+    return isHeadOfficeHomeRole(role);
+  }
+  if (pathname.startsWith("/eod/oversight")) {
+    return hasPermission(role, Permission.EOD_VIEW_ALL);
+  }
   if (pathname.startsWith("/supervisor")) {
     return hasPermission(role, Permission.DASHBOARD_SUPERVISOR);
   }
