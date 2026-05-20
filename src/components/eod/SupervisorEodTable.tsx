@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { EOD_STATUS_LABELS } from "@/lib/eod/status";
+import type { EodStatus } from "@prisma/client";
 
 type Row = {
   branchId: string;
@@ -10,16 +12,17 @@ type Row = {
   district: string | null;
   eodStatus: string;
   reportId: string | null;
+  complianceScore?: number | null;
 };
 
 export function SupervisorEodTable({ rows }: { rows: Row[] }) {
   const router = useRouter();
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
-  async function lockReport(reportId: string) {
+  async function reviewReport(reportId: string) {
     setLoadingId(reportId);
     try {
-      const res = await fetch(`/api/eod/${reportId}/lock`, { method: "POST" });
+      const res = await fetch(`/api/eod/${reportId}/review`, { method: "POST" });
       if (res.ok) router.refresh();
     } finally {
       setLoadingId(null);
@@ -27,35 +30,40 @@ export function SupervisorEodTable({ rows }: { rows: Row[] }) {
   }
 
   return (
-    <div className="polished-card overflow-hidden rounded-[1.5rem]">
-      <table className="w-full text-left text-sm">
-        <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
+    <div className="eod-history-table-wrap">
+      <table className="eod-history-table">
+        <thead>
           <tr>
-            <th className="px-4 py-3">Branch</th>
-            <th className="px-4 py-3">Code</th>
-            <th className="px-4 py-3">EOD today</th>
-            <th className="px-4 py-3">Action</th>
+            <th>Branch</th>
+            <th>Code</th>
+            <th>Status</th>
+            <th>Score</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.branchId} className="border-b border-slate-100 last:border-0">
-              <td className="px-4 py-3 font-medium">{r.name}</td>
-              <td className="px-4 py-3 text-slate-600">{r.branchCode}</td>
-              <td className="px-4 py-3">
+            <tr key={r.branchId}>
+              <td className="font-medium">{r.name}</td>
+              <td className="text-[var(--muted-foreground)]">{r.branchCode}</td>
+              <td>
                 <EodStatusPill status={r.eodStatus} />
               </td>
-              <td className="px-4 py-3">
-                {r.eodStatus === "SUBMITTED" && r.reportId && (
-                  <button
-                    type="button"
-                    disabled={loadingId === r.reportId}
-                    onClick={() => lockReport(r.reportId!)}
-                    className="text-sm font-bold text-[var(--primary)] hover:underline disabled:opacity-50"
-                  >
-                    Lock
-                  </button>
-                )}
+              <td>
+                {r.complianceScore != null ? `${r.complianceScore}%` : "—"}
+              </td>
+              <td>
+                {["SUBMITTED", "LATE", "ESCALATED"].includes(r.eodStatus) &&
+                  r.reportId && (
+                    <button
+                      type="button"
+                      disabled={loadingId === r.reportId}
+                      onClick={() => reviewReport(r.reportId!)}
+                      className="eod-history-link border-0 bg-transparent p-0 cursor-pointer"
+                    >
+                      Approve & lock
+                    </button>
+                  )}
               </td>
             </tr>
           ))}
@@ -66,16 +74,13 @@ export function SupervisorEodTable({ rows }: { rows: Row[] }) {
 }
 
 function EodStatusPill({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    MISSING: "bg-red-100 text-red-800",
-    LATE: "bg-orange-100 text-orange-800",
-    DRAFT: "bg-slate-100 text-slate-700",
-    SUBMITTED: "bg-blue-100 text-blue-800",
-    LOCKED: "bg-emerald-100 text-emerald-800",
-  };
+  const label =
+    status === "MISSING"
+      ? "Missing"
+      : (EOD_STATUS_LABELS[status as EodStatus] ?? status);
   return (
-    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${styles[status] ?? ""}`}>
-      {status}
+    <span className={`eod-status-badge eod-status-${status.toLowerCase()}`}>
+      {label}
     </span>
   );
 }

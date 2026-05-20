@@ -102,6 +102,10 @@ export function LoginForm() {
           </button>
         </div>
       </div>
+      <p className="text-center text-xs text-[var(--muted-foreground)]">
+        Sessions expire after 30 minutes of inactivity. Accounts lock after 5 failed
+        attempts.
+      </p>
       <button
         type="submit"
         disabled={loading}

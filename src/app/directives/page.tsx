@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
-import { DirectivePanel } from "@/components/directive/DirectivePanel";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { KnowledgeHub } from "@/components/directive/KnowledgeHub";
+import { KnowledgeAnalytics } from "@/components/directive/KnowledgeAnalytics";
 import { getServerSession } from "@/lib/auth/server";
 import { hasPermission, Permission, defaultRouteForRole } from "@/lib/rbac";
-import { listDirectives } from "@/lib/directive/service";
+import { listDirectives, getPinnedAndLatest } from "@/lib/directive/service";
 import { serializeDirective } from "@/lib/directive/serialize";
 import { prisma } from "@/lib/prisma";
 
@@ -19,22 +21,42 @@ export default async function DirectivesPage() {
     ? await prisma.branch.findUnique({ where: { id: session.branchId } })
     : null;
 
-  const directives = await listDirectives(session);
+  const viewer = {
+    id: session.sub,
+    role: session.role,
+    branchId: session.branchId,
+  };
+
+  const [directives, { pinned, latest }] = await Promise.all([
+    listDirectives(viewer),
+    getPinnedAndLatest(viewer),
+  ]);
+
+  const serializeOpts = {
+    branchId: session.branchId,
+    userId: session.sub,
+  };
+
+  const showAnalytics =
+    hasPermission(session.role, Permission.DIRECTIVE_PUBLISH) ||
+    hasPermission(session.role, Permission.DIRECTIVE_ACK);
 
   return (
     <AppShell
       user={session}
       branchLabel={branch ? `${branch.name} (${branch.branchCode})` : null}
     >
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">HO directives</h1>
-        <p className="text-slate-500">Policy circulars and compliance acknowledgment</p>
-      </header>
+      <PageHeader
+        title="Operational knowledge & procedures"
+        description="Internal banking SOPs, policies, and mandatory acknowledgment tracking"
+      />
 
-      <DirectivePanel
-        directives={directives.map((d) =>
-          serializeDirective(d, { branchId: session.branchId }),
-        )}
+      {showAnalytics && <KnowledgeAnalytics />}
+
+      <KnowledgeHub
+        initialDirectives={directives.map((d) => serializeDirective(d, serializeOpts))}
+        pinned={pinned.map((d) => serializeDirective(d, serializeOpts))}
+        latest={latest.map((d) => serializeDirective(d, serializeOpts))}
         canAck={hasPermission(session.role, Permission.DIRECTIVE_ACK)}
         canPublish={hasPermission(session.role, Permission.DIRECTIVE_PUBLISH)}
       />

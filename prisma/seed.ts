@@ -58,12 +58,12 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: "admin@maatiilink.local" },
-    update: {},
+    update: { role: Role.SUPER_ADMIN },
     create: {
       email: "admin@maatiilink.local",
-      name: "HO Admin (Dev)",
+      name: "Super Admin (Dev)",
       passwordHash,
-      role: Role.HO_ADMIN,
+      role: Role.SUPER_ADMIN,
       branchId: hq.id,
     },
   });
@@ -94,23 +94,23 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: "supervisor@maatiilink.local" },
-    update: {},
+    update: { role: Role.REGIONAL_SUPERVISOR },
     create: {
       email: "supervisor@maatiilink.local",
-      name: "District Supervisor (Dev)",
+      name: "Regional Supervisor (Dev)",
       passwordHash,
-      role: Role.SUPERVISOR,
+      role: Role.REGIONAL_SUPERVISOR,
     },
   });
 
   await prisma.user.upsert({
     where: { email: "auditor@maatiilink.local" },
-    update: {},
+    update: { role: Role.AUDITOR_READ_ONLY },
     create: {
       email: "auditor@maatiilink.local",
       name: "Internal Auditor (Dev)",
       passwordHash,
-      role: Role.AUDITOR,
+      role: Role.AUDITOR_READ_ONLY,
     },
   });
 
@@ -126,18 +126,53 @@ async function main() {
     },
   });
 
+  await prisma.user.upsert({
+    where: { email: "compliance@maatiilink.local" },
+    update: {},
+    create: {
+      email: "compliance@maatiilink.local",
+      name: "Compliance Officer (Dev)",
+      passwordHash,
+      role: Role.COMPLIANCE_OFFICER,
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email: "it@maatiilink.local" },
+    update: {},
+    create: {
+      email: "it@maatiilink.local",
+      name: "IT Support (Dev)",
+      passwordHash,
+      role: Role.IT_SUPPORT,
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email: "hoops@maatiilink.local" },
+    update: {},
+    create: {
+      email: "hoops@maatiilink.local",
+      name: "HO Operations (Dev)",
+      passwordHash,
+      role: Role.HO_OPERATIONS,
+      branchId: hq.id,
+    },
+  });
+
   console.log(
     "Seed complete:",
     createdBranches.map((b) => b.branchCode),
   );
   console.log("Dev logins (change passwords before pilot):");
-  console.log("  admin@maatiilink.local / ChangeMe123!");
+  console.log("  admin@maatiilink.local / ChangeMe123! (Super Admin)");
   console.log("  manager@maatiilink.local / ChangeMe123!");
-  console.log("  manager2@maatiilink.local / ChangeMe123!");
   console.log("  supervisor@maatiilink.local / ChangeMe123!");
   console.log("  auditor@maatiilink.local / ChangeMe123!");
   console.log("  staff@maatiilink.local / ChangeMe123!");
-  console.log("All seed branches flagged isPilotBranch=true for Phase 5 dev.");
+  console.log("  compliance@maatiilink.local / ChangeMe123!");
+  console.log("  it@maatiilink.local / ChangeMe123!");
+  console.log("  hoops@maatiilink.local / ChangeMe123!");
 }
 
 main()

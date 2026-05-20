@@ -37,7 +37,7 @@ export async function createAdminUser(
 
   const data = parsed.data;
   if (
-    ["BRANCH_STAFF", "BRANCH_MANAGER"].includes(data.role) &&
+    ["BRANCH_STAFF", "BRANCH_MANAGER"].includes(data.role as string) &&
     !data.branchId
   ) {
     return {

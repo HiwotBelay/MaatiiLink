@@ -34,3 +34,6 @@ prisma/*.db
 
 # Docker volumes (local)
 postgres_data/
+
+# Incident attachments (local storage)
+storage/

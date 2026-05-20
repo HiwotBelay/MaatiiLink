@@ -4,6 +4,8 @@ import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatCard } from "@/components/layout/StatCard";
 import { ComplianceTable } from "@/components/supervisor/ComplianceTable";
+import { EodSupervisorAnalytics } from "@/components/eod/EodSupervisorAnalytics";
+import { EodAlertsPanel } from "@/components/eod/EodAlertsPanel";
 import { SupervisorToolbar } from "@/components/supervisor/SupervisorToolbar";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "@/lib/auth/server";
@@ -23,9 +25,11 @@ export default async function SupervisorPage() {
     await getBranchComplianceSummary();
 
   const onTime = rows.filter((r) =>
-    ["SUBMITTED", "LOCKED"].includes(r.eodStatus),
+    ["SUBMITTED", "REVIEWED"].includes(r.eodStatus),
   ).length;
-  const missing = rows.filter((r) => ["MISSING", "LATE"].includes(r.eodStatus)).length;
+  const missing = rows.filter((r) =>
+    ["MISSING", "LATE", "ESCALATED"].includes(r.eodStatus),
+  ).length;
 
   const branches = await prisma.branch.findMany({
     select: { district: true, region: true },
@@ -85,7 +89,7 @@ export default async function SupervisorPage() {
           All incidents →
         </Link>
         <Link href="/directives" className="font-medium text-[#00529b] hover:underline">
-          All directives →
+          Knowledge center →
         </Link>
         {hasPermission(session.role, Permission.PILOT_VIEW) && (
           <Link href="/pilot" className="font-medium text-[#00529b] hover:underline">
@@ -95,6 +99,11 @@ export default async function SupervisorPage() {
       </section>
 
       <SupervisorToolbar districts={districts} regions={regions} />
+
+      <section className="mb-8 grid gap-6 lg:grid-cols-[1fr_280px]">
+        <EodSupervisorAnalytics />
+        <EodAlertsPanel />
+      </section>
 
       <section>
         <h2 className="mb-4 text-base font-semibold text-[var(--foreground)]">

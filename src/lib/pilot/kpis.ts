@@ -35,7 +35,7 @@ export async function computePilotKpis(periodDays = 14): Promise<PilotKpiResult>
   });
 
   const eodOnTime = eodReports.filter((r) =>
-    ["SUBMITTED", "LOCKED"].includes(r.status),
+    ["SUBMITTED", "REVIEWED", "LATE"].includes(r.status),
   ).length;
   const eodOnTimePercent =
     eodReports.length === 0 ? 0 : Math.round((eodOnTime / eodReports.length) * 100);

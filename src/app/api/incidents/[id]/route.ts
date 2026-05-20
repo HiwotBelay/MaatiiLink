@@ -4,7 +4,7 @@ import { requireApiUser } from "@/lib/api/with-auth";
 import { jsonError, jsonOk, jsonValidation } from "@/lib/api/http";
 import {
   getIncidentById,
-  updateIncidentStatus,
+  updateIncident,
   IncidentError,
 } from "@/lib/incident/service";
 import { serializeIncident } from "@/lib/incident/serialize";
@@ -53,7 +53,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   if (!parsed.success) return jsonValidation(parsed.error);
 
   try {
-    const incident = await updateIncidentStatus(user, id, parsed.data);
+    const incident = await updateIncident(user, id, parsed.data);
     return jsonOk({ ok: true, incident: serializeIncident(incident) });
   } catch (e) {
     if (e instanceof IncidentError) {

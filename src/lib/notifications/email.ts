@@ -40,9 +40,13 @@ function supervisorRecipients(): string[] {
     .filter(Boolean);
 }
 
-async function sendMail(subject: string, text: string) {
+async function sendMail(
+  subject: string,
+  text: string,
+  recipients?: string[],
+) {
   const transporter = getTransporter();
-  const to = supervisorRecipients();
+  const to = recipients ?? supervisorRecipients();
   const from = process.env.NOTIFY_FROM ?? "maatiilink@localhost";
 
   if (!transporter || to.length === 0) {
@@ -57,6 +61,40 @@ async function sendMail(subject: string, text: string) {
   } catch (err) {
     console.error("[notify] email failed:", err);
   }
+}
+
+/** Email hook placeholder — HO operations distribution list. */
+export async function notifyHoIncidentCritical(payload: {
+  incidentRef: string;
+  title: string;
+  branchName: string;
+  event: string;
+}) {
+  const hoRaw = process.env.HO_NOTIFY_EMAIL ?? process.env.SUPERVISOR_NOTIFY_EMAIL ?? "";
+  if (!hoRaw.trim()) {
+    if (process.env.NODE_ENV === "development") {
+      console.info("[notify/ho] HO_NOTIFY_EMAIL not configured:", payload.title);
+    }
+    return;
+  }
+
+  const appUrl = process.env.APP_URL ?? "http://localhost:3000";
+  const subject = `[MaatiiLink HO] Critical incident ${payload.event}: ${payload.title}`;
+  const text = [
+    `Head Office alert — ${payload.event}`,
+    ``,
+    `Reference: ${payload.incidentRef}`,
+    `Branch: ${payload.branchName}`,
+    `Title: ${payload.title}`,
+    ``,
+    `Command center: ${appUrl}/incidents`,
+  ].join("\n");
+
+  const to = hoRaw
+    .split(",")
+    .map((e) => e.trim())
+    .filter(Boolean);
+  await sendMail(subject, text, to);
 }
 
 export async function notifyIncidentEscalation(payload: IncidentNotify) {

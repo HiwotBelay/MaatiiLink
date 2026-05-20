@@ -4,28 +4,44 @@ import {
   canSubmitEod,
   canLockEod,
 } from "./service";
-import { getAddisDateString } from "./constants";
+import {
+  canSubmitStatus,
+  canReviewStatus,
+  isEditableStatus,
+  computeComplianceScore,
+} from "./status";
 
-describe("eod permissions", () => {
-  it("manager can submit draft", () => {
-    expect(canSubmitEod("DRAFT", "BRANCH_MANAGER")).toBe(true);
+describe("eod service helpers", () => {
+  it("branch manager can submit when pending", () => {
+    expect(canSubmitEod("PENDING", "BRANCH_MANAGER")).toBe(true);
   });
 
-  it("staff cannot submit", () => {
-    expect(canSubmitEod("DRAFT", "BRANCH_STAFF")).toBe(false);
+  it("branch staff cannot submit", () => {
+    expect(canSubmitEod("PENDING", "BRANCH_STAFF")).toBe(false);
   });
 
-  it("supervisor can lock submitted", () => {
-    expect(canLockEod("SUBMITTED", "SUPERVISOR")).toBe(true);
+  it("supervisor can review submitted", () => {
+    expect(canLockEod("SUBMITTED", "REGIONAL_SUPERVISOR")).toBe(true);
+    expect(canLockEod("PENDING", "REGIONAL_SUPERVISOR")).toBe(false);
   });
 
-  it("cannot edit submitted", () => {
-    expect(canEditEod("SUBMITTED", "BRANCH_MANAGER")).toBe(false);
+  it("status helpers", () => {
+    expect(isEditableStatus("PENDING")).toBe(true);
+    expect(isEditableStatus("SUBMITTED")).toBe(false);
+    expect(canSubmitStatus("PENDING")).toBe(true);
+    expect(canReviewStatus("LATE")).toBe(true);
   });
-});
 
-describe("eod constants", () => {
-  it("returns addis date as YYYY-MM-DD", () => {
-    expect(getAddisDateString()).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  it("compliance score penalizes late and critical liquidity", () => {
+    const score = computeComplianceScore({
+      status: "LATE",
+      submittedAt: new Date(),
+      dueAt: new Date(Date.now() - 3600000),
+      complaintCount: 6,
+      atmDowntimeMinutes: 150,
+      systemDowntimeMinutes: 0,
+      liquidityStatus: "CRITICAL",
+    });
+    expect(score).toBeLessThan(50);
   });
 });

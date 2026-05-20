@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
-import { TicketPanel } from "@/components/ticket/TicketPanel";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { ServiceOpsCenter } from "@/components/ticket/ServiceOpsCenter";
+import { ServiceOpsDashboard } from "@/components/ticket/ServiceOpsDashboard";
 import { getServerSession } from "@/lib/auth/server";
 import { hasPermission, Permission, defaultRouteForRole } from "@/lib/rbac";
 import { listTickets, listAssignableUsers } from "@/lib/ticket/service";
@@ -17,15 +19,22 @@ export default async function TicketsPage() {
 
   if (!canView) redirect(defaultRouteForRole(session.role));
 
+  const isOpsView = hasPermission(session.role, Permission.TICKET_VIEW_ALL);
+  const canAssign = hasPermission(session.role, Permission.TICKET_ASSIGN);
+
   const branch = session.branchId
     ? await prisma.branch.findUnique({ where: { id: session.branchId } })
     : null;
 
+  const viewer = {
+    id: session.sub,
+    role: session.role,
+    branchId: session.branchId,
+  };
+
   const [tickets, assignees] = await Promise.all([
-    listTickets(session),
-    hasPermission(session.role, Permission.TICKET_ASSIGN)
-      ? listAssignableUsers()
-      : Promise.resolve([]),
+    listTickets(viewer),
+    canAssign ? listAssignableUsers() : Promise.resolve([]),
   ]);
 
   return (
@@ -33,17 +42,21 @@ export default async function TicketsPage() {
       user={session}
       branchLabel={branch ? `${branch.name} (${branch.branchCode})` : null}
     >
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Service desk</h1>
-        <p className="text-slate-500">IT, facilities, and cash logistics requests</p>
-      </header>
+      <PageHeader
+        title="Service operations center"
+        description="Department routing · SLA tracking · assignment queue · escalation"
+      />
 
-      <TicketPanel
-        tickets={tickets.map(serializeTicket)}
+      {isOpsView && <ServiceOpsDashboard />}
+
+      <ServiceOpsCenter
+        initialTickets={tickets.map((t) =>
+          serializeTicket(t, { includeInternalNotes: canAssign }),
+        )}
         canCreate={hasPermission(session.role, Permission.TICKET_CREATE)}
-        canAssign={hasPermission(session.role, Permission.TICKET_ASSIGN)}
+        canAssign={canAssign}
         assignees={assignees}
-        showBranch={hasPermission(session.role, Permission.TICKET_VIEW_ALL)}
+        showBranch={isOpsView}
       />
     </AppShell>
   );

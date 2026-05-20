@@ -45,7 +45,7 @@ export function AppSidebar({ user, branchLabel }: Props) {
       href: "/dashboard",
       label: "Dashboard",
       icon: "dashboard" as const,
-      show: !["SUPERVISOR", "HO_ADMIN", "AUDITOR"].includes(user.role),
+      show: !hasPermission(user.role, Permission.DASHBOARD_SUPERVISOR),
     },
     {
       href: "/supervisor",
@@ -69,13 +69,13 @@ export function AppSidebar({ user, branchLabel }: Props) {
     },
     {
       href: "/directives",
-      label: "Directives",
+      label: "Knowledge",
       icon: "directives" as const,
       show: hasPermission(user.role, Permission.DIRECTIVE_VIEW),
     },
     {
       href: "/tickets",
-      label: "Service desk",
+      label: "Service ops",
       icon: "tickets" as const,
       show:
         hasPermission(user.role, Permission.TICKET_VIEW_BRANCH) ||
@@ -88,6 +88,12 @@ export function AppSidebar({ user, branchLabel }: Props) {
       show:
         hasPermission(user.role, Permission.PILOT_VIEW) ||
         hasPermission(user.role, Permission.PILOT_FEEDBACK_CREATE),
+    },
+    {
+      href: "/security",
+      label: "Security",
+      icon: "audit" as const,
+      show: hasPermission(user.role, Permission.SECURITY_VIEW),
     },
     {
       href: "/audit",

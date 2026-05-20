@@ -11,15 +11,26 @@ datasource db {
 enum Role {
   BRANCH_STAFF
   BRANCH_MANAGER
-  SUPERVISOR
-  HO_ADMIN
-  AUDITOR
+  REGIONAL_SUPERVISOR
+  HO_OPERATIONS
+  COMPLIANCE_OFFICER
+  IT_SUPPORT
+  AUDITOR_READ_ONLY
+  SUPER_ADMIN
 }
 
 enum EodStatus {
-  DRAFT
+  PENDING
   SUBMITTED
-  LOCKED
+  LATE
+  ESCALATED
+  REVIEWED
+}
+
+enum LiquidityStatus {
+  ADEQUATE
+  WATCH
+  CRITICAL
 }
 
 enum IncidentSeverity {
@@ -31,21 +42,33 @@ enum IncidentSeverity {
 
 enum IncidentStatus {
   OPEN
+  ASSIGNED
+  INVESTIGATING
   ESCALATED
   RESOLVED
-  CLOSED
+  ARCHIVED
+}
+
+enum IncidentAttachmentKind {
+  SCREENSHOT
+  PDF
+  EVIDENCE
 }
 
 enum TicketCategory {
   IT
   FACILITIES
   CASH_LOGISTICS
-  OTHER
+  SECURITY_OPERATIONS
+  NETWORK_OPERATIONS
 }
 
 enum TicketStatus {
   OPEN
+  ASSIGNED
   IN_PROGRESS
+  WAITING
+  ESCALATED
   RESOLVED
   CLOSED
 }
@@ -79,6 +102,24 @@ enum PilotFeedbackStatus {
   WONTFIX
 }
 
+enum DirectiveCategory {
+  CASH_OPERATIONS
+  LOAN_PROCEDURES
+  COMPLIANCE
+  TREASURY
+  SECURITY
+  CUSTOMER_OPERATIONS
+  ATM_OPERATIONS
+  EMERGENCY_PROCEDURES
+}
+
+enum DirectivePriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
 model Branch {
   id            String   @id @default(cuid())
   name          String
@@ -96,6 +137,8 @@ model Branch {
   directiveAcks      DirectiveAcknowledgment[]
   tickets            ServiceTicket[]
   pilotFeedback      PilotFeedback[]
+  auditLogs          AuditLog[]
+  eodWindows         EodReportingWindow[]
 }
 
 model PilotFeedback {
@@ -116,76 +159,238 @@ model PilotFeedback {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  name         String
-  email        String   @unique
-  passwordHash String?
-  role         Role
-  branchId     String?
-  branch       Branch?  @relation(fields: [branchId], references: [id])
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                  String    @id @default(cuid())
+  name                String
+  email               String    @unique
+  passwordHash        String?
+  role                Role
+  branchId            String?
+  branch              Branch?   @relation(fields: [branchId], references: [id])
+  isActive            Boolean   @default(true)
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+  lastLoginAt         DateTime?
+  passwordChangedAt   DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   eodReportsSubmitted   EodReport[]                 @relation("EodSubmittedBy")
+  eodReportsReviewed    EodReport[]                 @relation("EodReviewedBy")
   incidentsReported     Incident[]                  @relation("IncidentReporter")
   directiveAcks         DirectiveAcknowledgment[]
+  directiveReads        DirectiveRead[]
   ticketsCreated        ServiceTicket[]             @relation("TicketCreator")
   ticketsAssigned       ServiceTicket[]             @relation("TicketAssignee")
+  ticketsEscalatedTo    ServiceTicket[]             @relation("TicketEscalatedTo")
+  ticketNotes           TicketNote[]
   directivesPublished   Directive[]                 @relation("DirectivePublisher")
   auditLogs             AuditLog[]
   pilotFeedback         PilotFeedback[]
+  sessions              UserSession[]
+  loginActivities       LoginActivity[]
+  assignedIncidents     Incident[]                  @relation("IncidentAssignee")
+  incidentAttachments   IncidentAttachment[]
+  notifications         Notification[]
 }
 
-model EodReport {
-  id              String    @id @default(cuid())
-  branchId        String
-  branch          Branch    @relation(fields: [branchId], references: [id])
-  reportDate      DateTime  @db.Date
-  status          EodStatus @default(DRAFT)
-  openingCashBand String?
-  closingCashBand String?
-  anomalyNotes    String?
-  complaintCount  Int       @default(0)
-  staffingNotes   String?
-  submittedById   String?
-  submittedBy     User?     @relation("EodSubmittedBy", fields: [submittedById], references: [id])
-  submittedAt     DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+model UserSession {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash      String    @unique
+  ipAddress      String?
+  userAgent      String?
+  deviceLabel    String?
+  lastActivityAt DateTime  @default(now())
+  expiresAt      DateTime
+  revokedAt      DateTime?
+  createdAt      DateTime  @default(now())
 
-  @@unique([branchId, reportDate])
+  @@index([userId])
+  @@index([expiresAt])
 }
 
-model Incident {
-  id           String           @id @default(cuid())
-  branchId     String
-  branch       Branch           @relation(fields: [branchId], references: [id])
-  reporterId   String
-  reporter     User             @relation("IncidentReporter", fields: [reporterId], references: [id])
-  category     String
-  severity     IncidentSeverity
-  status       IncidentStatus   @default(OPEN)
-  title        String
-  description  String
-  resolvedAt   DateTime?
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
-}
-
-model Directive {
+model LoginActivity {
   id            String   @id @default(cuid())
-  title         String
-  body          String
-  isCritical    Boolean  @default(false)
-  publishedById String
-  publishedBy   User     @relation("DirectivePublisher", fields: [publishedById], references: [id])
-  publishedAt   DateTime @default(now())
-  deadlineAt    DateTime?
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  email         String
+  success       Boolean
+  failureReason String?
+  ipAddress     String?
+  userAgent     String?
+  branchId      String?
+  createdAt     DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([email, createdAt])
+  @@index([createdAt])
+}
+
+model EodReportingWindow {
+  id            String   @id @default(cuid())
+  branchId      String?
+  branch        Branch?  @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  region        String?
+  cutoffHour    Int      @default(18)
+  cutoffMinute  Int      @default(0)
+  graceMinutes  Int      @default(30)
+  timezone      String   @default("Africa/Addis_Ababa")
+  isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  @@index([branchId])
+  @@index([region])
+}
+
+model EodReport {
+  id                       String           @id @default(cuid())
+  branchId                 String
+  branch                   Branch           @relation(fields: [branchId], references: [id])
+  reportDate               DateTime         @db.Date
+  status                   EodStatus        @default(PENDING)
+  dueAt                    DateTime?
+  draftSavedAt             DateTime?
+  openingCashBand          String?
+  closingCashBand          String?
+  cashInflowBand           String?
+  cashOutflowBand          String?
+  liquidityStatus          LiquidityStatus?
+  complaintCount           Int              @default(0)
+  staffingIssues           String?
+  atmDowntimeMinutes       Int              @default(0)
+  systemDowntimeMinutes    Int              @default(0)
+  operationalBlockers      String?
+  securityConcerns         String?
+  highValueTransactionNotes String?
+  performanceNotes         String?
+  anomalyNotes             String?
+  submittedById            String?
+  submittedBy              User?            @relation("EodSubmittedBy", fields: [submittedById], references: [id])
+  submittedAt              DateTime?
+  reviewedById             String?
+  reviewedBy               User?            @relation("EodReviewedBy", fields: [reviewedById], references: [id])
+  reviewedAt               DateTime?
+  escalatedAt              DateTime?
+  escalationReason         String?
+  complianceScore          Int?
+  createdAt                DateTime         @default(now())
+  updatedAt                DateTime         @updatedAt
+
+  @@unique([branchId, reportDate])
+  @@index([status, reportDate])
+  @@index([branchId, status])
+}
+
+model Incident {
+  id                  String           @id @default(cuid())
+  incidentRef         String           @unique
+  branchId            String
+  branch              Branch           @relation(fields: [branchId], references: [id])
+  region              String?
+  reporterId          String
+  reporter            User             @relation("IncidentReporter", fields: [reporterId], references: [id])
+  assigneeId          String?
+  assignee            User?            @relation("IncidentAssignee", fields: [assigneeId], references: [id])
+  category            String
+  severity            IncidentSeverity
+  status              IncidentStatus   @default(OPEN)
+  title               String
+  description         String
+  complianceEscalated Boolean          @default(false)
+  slaResponseDueAt    DateTime?
+  slaResolutionDueAt  DateTime?
+  slaBreachedAt       DateTime?
+  firstResponseAt     DateTime?
+  assignedAt          DateTime?
+  investigatingAt     DateTime?
+  escalatedAt         DateTime?
+  resolvedAt          DateTime?
+  archivedAt          DateTime?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  attachments IncidentAttachment[]
+
+  @@index([branchId, status])
+  @@index([region, status])
+  @@index([severity, status])
+  @@index([complianceEscalated])
+  @@index([slaResolutionDueAt])
+}
+
+model IncidentAttachment {
+  id           String                 @id @default(cuid())
+  incidentId   String
+  incident     Incident               @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  uploadedById String
+  uploadedBy   User                   @relation(fields: [uploadedById], references: [id])
+  kind         IncidentAttachmentKind
+  fileName     String
+  mimeType     String
+  sizeBytes    Int
+  storageKey   String
+  createdAt    DateTime               @default(now())
+
+  @@index([incidentId])
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  body      String
+  link      String?
+  readAt    DateTime?
+  metadata  Json?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt])
+  @@index([createdAt])
+}
+
+model Directive {
+  id            String             @id @default(cuid())
+  title         String
+  summary       String?
+  body          String
+  category      DirectiveCategory  @default(COMPLIANCE)
+  priority      DirectivePriority  @default(MEDIUM)
+  keywords      String[]           @default([])
+  isCritical    Boolean            @default(false)
+  isPinned      Boolean            @default(false)
+  isMandatory   Boolean            @default(false)
+  isSop         Boolean            @default(false)
+  publishedById String
+  publishedBy   User               @relation("DirectivePublisher", fields: [publishedById], references: [id])
+  publishedAt   DateTime           @default(now())
+  deadlineAt    DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
   acknowledgments DirectiveAcknowledgment[]
+  reads           DirectiveRead[]
+
+  @@index([category])
+  @@index([priority])
+  @@index([isPinned])
+  @@index([publishedAt])
+  @@index([isMandatory])
+}
+
+model DirectiveRead {
+  id          String    @id @default(cuid())
+  directiveId String
+  directive   Directive @relation(fields: [directiveId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  readAt      DateTime  @default(now())
+
+  @@unique([directiveId, userId])
+  @@index([userId])
 }
 
 model DirectiveAcknowledgment {
@@ -203,33 +408,71 @@ model DirectiveAcknowledgment {
 }
 
 model ServiceTicket {
-  id           String         @id @default(cuid())
-  branchId     String
-  branch       Branch         @relation(fields: [branchId], references: [id])
-  creatorId    String
-  creator      User           @relation("TicketCreator", fields: [creatorId], references: [id])
-  assigneeId   String?
-  assignee     User?          @relation("TicketAssignee", fields: [assigneeId], references: [id])
-  category     TicketCategory
-  priority     TicketPriority @default(MEDIUM)
-  status       TicketStatus   @default(OPEN)
-  title        String
-  description  String
-  resolvedAt   DateTime?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  id                 String         @id @default(cuid())
+  ticketRef          String         @unique
+  branchId           String
+  branch             Branch         @relation(fields: [branchId], references: [id])
+  creatorId          String
+  creator            User           @relation("TicketCreator", fields: [creatorId], references: [id])
+  assigneeId         String?
+  assignee           User?          @relation("TicketAssignee", fields: [assigneeId], references: [id])
+  escalatedToId      String?
+  escalatedTo        User?          @relation("TicketEscalatedTo", fields: [escalatedToId], references: [id])
+  category           TicketCategory
+  priority           TicketPriority @default(MEDIUM)
+  status             TicketStatus   @default(OPEN)
+  tags               String[]       @default([])
+  title              String
+  description        String
+  slaResponseDueAt   DateTime?
+  slaResolutionDueAt DateTime?
+  slaBreachedAt      DateTime?
+  firstResponseAt    DateTime?
+  escalatedAt        DateTime?
+  resolvedAt         DateTime?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  notes TicketNote[]
+
+  @@index([category, status])
+  @@index([assigneeId])
+  @@index([branchId])
+  @@index([priority])
+  @@index([slaResolutionDueAt])
+}
+
+model TicketNote {
+  id         String        @id @default(cuid())
+  ticketId   String
+  ticket     ServiceTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId   String
+  author     User          @relation(fields: [authorId], references: [id])
+  body       String
+  isInternal Boolean       @default(true)
+  createdAt  DateTime      @default(now())
+
+  @@index([ticketId])
 }
 
 model AuditLog {
-  id         String   @id @default(cuid())
-  userId     String?
-  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  action     String
-  entityType String
-  entityId   String?
-  metadata   Json?
-  createdAt  DateTime @default(now())
+  id            String   @id @default(cuid())
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action        String
+  module        String
+  entityType    String
+  entityId      String?
+  branchId      String?
+  branch        Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  previousValue Json?
+  newValue      Json?
+  metadata      Json?
+  createdAt     DateTime @default(now())
 
   @@index([entityType, entityId])
+  @@index([module, createdAt])
+  @@index([branchId, createdAt])
+  @@index([userId, createdAt])
   @@index([createdAt])
 }

@@ -10,14 +10,14 @@ export async function getBranchComplianceSummary() {
       by: ["branchId"],
       where: {
         branchId: { in: branchIds },
-        status: { in: ["OPEN", "ESCALATED"] },
+        status: { in: ["OPEN", "ASSIGNED", "INVESTIGATING", "ESCALATED"] },
       },
       _count: { id: true },
     }),
     prisma.incident.findMany({
       where: {
         severity: "CRITICAL",
-        status: { in: ["OPEN", "ESCALATED"] },
+        status: { in: ["OPEN", "ASSIGNED", "INVESTIGATING", "ESCALATED"] },
       },
       select: { id: true, title: true, branchId: true },
     }),
@@ -43,7 +43,7 @@ export async function getBranchComplianceSummary() {
 async function getOverdueDirectiveCountsByBranch(branchIds: string[]) {
   const now = new Date();
   const directives = await prisma.directive.findMany({
-    where: { deadlineAt: { lt: now } },
+    where: { isMandatory: true, deadlineAt: { lt: now } },
     select: {
       id: true,
       acknowledgments: { select: { branchId: true } },

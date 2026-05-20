@@ -1,25 +1,49 @@
 import { NextRequest } from "next/server";
+import type { DirectiveCategory, DirectivePriority } from "@prisma/client";
 import { Permission } from "@/lib/rbac";
 import { requireApiUser } from "@/lib/api/with-auth";
 import { jsonError, jsonOk, jsonValidation } from "@/lib/api/http";
 import {
-  listDirectives,
   publishDirective,
+  searchDirectives,
   DirectiveError,
 } from "@/lib/directive/service";
 import { serializeDirective } from "@/lib/directive/serialize";
-import { directivePublishSchema } from "@/lib/directive/validation";
+import {
+  directivePublishSchema,
+  directiveSearchSchema,
+} from "@/lib/directive/validation";
 
 export async function GET(request: NextRequest) {
-  const { error, user } = await requireApiUser(request, Permission.DIRECTIVE_VIEW);
+  const { error, user } = await requireApiUser(
+    request,
+    Permission.DIRECTIVE_VIEW,
+  );
   if (error || !user) return error!;
 
+  const raw = Object.fromEntries(request.nextUrl.searchParams.entries());
+  const parsed = directiveSearchSchema.safeParse(raw);
+  if (!parsed.success) return jsonValidation(parsed.error);
+
   try {
-    const directives = await listDirectives(user);
+    const directives = await searchDirectives(user, {
+      q: parsed.data.q,
+      category: parsed.data.category as DirectiveCategory | undefined,
+      priority: parsed.data.priority as DirectivePriority | undefined,
+      critical: parsed.data.critical,
+      recent: parsed.data.recent,
+      pinned: parsed.data.pinned,
+      mandatory: parsed.data.mandatory,
+      sop: parsed.data.sop,
+      unread: parsed.data.unread,
+    });
     return jsonOk({
       ok: true,
       directives: directives.map((d) =>
-        serializeDirective(d, { branchId: user.branchId }),
+        serializeDirective(d, {
+          branchId: user.branchId,
+          userId: user.id,
+        }),
       ),
     });
   } catch (e) {
@@ -50,7 +74,10 @@ export async function POST(request: NextRequest) {
     return jsonOk(
       {
         ok: true,
-        directive: serializeDirective(directive, { branchId: user.branchId }),
+        directive: serializeDirective(directive, {
+          branchId: user.branchId,
+          userId: user.id,
+        }),
       },
       201,
     );

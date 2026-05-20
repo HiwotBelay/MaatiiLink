@@ -4,8 +4,8 @@ import { ArrowRight } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatCard } from "@/components/layout/StatCard";
-import { getServerSession } from "@/lib/auth/server";
-import { defaultRouteForRole } from "@/lib/rbac";
+import { getServerSession, redirectToLogin } from "@/lib/auth/server";
+import { defaultRouteForRole, hasPermission, Permission } from "@/lib/rbac";
 import { getTodayEod } from "@/lib/eod/service";
 import { countOpenIncidentsForBranch } from "@/lib/incident/service";
 import { countOverdueAcksForBranch } from "@/lib/directive/service";
@@ -15,9 +15,9 @@ import { getAddisDateString } from "@/lib/eod/constants";
 
 export default async function DashboardPage() {
   const session = await getServerSession();
-  if (!session) redirect("/login");
+  if (!session) redirectToLogin("invalid_session");
 
-  if (["SUPERVISOR", "HO_ADMIN", "AUDITOR"].includes(session.role)) {
+  if (hasPermission(session.role, Permission.DASHBOARD_SUPERVISOR)) {
     redirect(defaultRouteForRole(session.role));
   }
 
@@ -43,11 +43,15 @@ export default async function DashboardPage() {
 
   const eodStatus = !todayEod
     ? { label: "Not started", tone: "danger" as const }
-    : todayEod.status === "DRAFT"
-      ? { label: "Draft", tone: "warning" as const }
+    : todayEod.status === "PENDING"
+      ? { label: "Pending", tone: "warning" as const }
       : todayEod.status === "SUBMITTED"
         ? { label: "Submitted", tone: "default" as const }
-        : { label: "Locked", tone: "success" as const };
+        : todayEod.status === "LATE"
+          ? { label: "Late", tone: "warning" as const }
+          : todayEod.status === "REVIEWED"
+            ? { label: "Reviewed", tone: "success" as const }
+            : { label: todayEod.status, tone: "default" as const };
 
   const modules = [
     {
@@ -63,13 +67,13 @@ export default async function DashboardPage() {
       href: "/incidents",
     },
     {
-      title: "Overdue directives",
+      title: "Overdue policies",
       value: String(overdueDirectives),
       tone: overdueDirectives > 0 ? ("danger" as const) : ("success" as const),
       href: "/directives",
     },
     {
-      title: "Open tickets",
+      title: "Open service requests",
       value: String(openTickets),
       tone: openTickets > 0 ? ("warning" as const) : ("default" as const),
       href: "/tickets",

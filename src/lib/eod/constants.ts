@@ -10,6 +10,12 @@ export type CashBand = (typeof CASH_BANDS)[number]["value"];
 
 export const CASH_BAND_VALUES = CASH_BANDS.map((b) => b.value);
 
+export const LIQUIDITY_OPTIONS = [
+  { value: "ADEQUATE", label: "Adequate" },
+  { value: "WATCH", label: "Watch — monitor closely" },
+  { value: "CRITICAL", label: "Critical — escalate" },
+] as const;
+
 /** Default EOD submission deadline (18:00 Addis Ababa) */
 export const EOD_CUTOFF_HOUR = 18;
 

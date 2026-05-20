@@ -3,6 +3,7 @@ import { Home } from "lucide-react";
 import { AppSidebar } from "./AppSidebar";
 import { UserMenu } from "./UserMenu";
 import { ProductionBanner } from "./ProductionBanner";
+import { SessionHeartbeat } from "@/components/security/SessionHeartbeat";
 import type { Role } from "@prisma/client";
 
 type AppShellProps = {
@@ -14,6 +15,7 @@ type AppShellProps = {
 export function AppShell({ user, branchLabel, children }: AppShellProps) {
   return (
     <div className="app-layout">
+      <SessionHeartbeat />
       <AppSidebar user={user} branchLabel={branchLabel} />
       <div className="app-main">
         <ProductionBanner />
