@@ -362,6 +362,13 @@ export async function addIncidentAttachment(
   incidentId: string,
   file: { name: string; mimeType: string; buffer: Buffer },
 ) {
+  if (
+    !hasPermission(user.role, Permission.INCIDENT_CREATE) &&
+    !hasPermission(user.role, Permission.INCIDENT_UPDATE)
+  ) {
+    throw new IncidentError("Forbidden", "FORBIDDEN");
+  }
+
   const incident = await getIncidentById(user, incidentId);
   if (!incident) throw new IncidentError("Not found", "NOT_FOUND");
 

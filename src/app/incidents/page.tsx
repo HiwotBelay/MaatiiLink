@@ -7,6 +7,8 @@ import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { getServerSession } from "@/lib/auth/server";
 import { hasPermission, Permission, defaultRouteForRole } from "@/lib/rbac";
 import { canAssignIncidents, toIncidentViewer } from "@/lib/incident/access";
+import { isBranchManager, isBranchStaff } from "@/lib/roles/branch-staff";
+import { RoleGuideBanner } from "@/components/layout/RoleGuideBanner";
 import { listIncidents } from "@/lib/incident/service";
 import { serializeIncident } from "@/lib/incident/serialize";
 import { prisma } from "@/lib/prisma";
@@ -35,10 +37,25 @@ export default async function IncidentsPage() {
       branchLabel={branch ? `${branch.branchCode} — ${branch.name}` : null}
     >
       <PageHeader
-        title="Incident command center"
-        description="Operational incident management · SLA · role-based visibility · compliance escalation"
+        title={
+          isBranchStaff(session.role)
+            ? "Report an incident"
+            : isBranchManager(session.role)
+              ? "Branch incidents"
+              : "Incident command center"
+        }
+        description={
+          isBranchStaff(session.role)
+            ? "Report fraud, downtime, cash variance, or security issues at your branch — attach evidence when you can"
+            : isBranchManager(session.role)
+              ? "Report new issues, update resolution status, and attach evidence for your branch"
+              : "Operational incident management · SLA · role-based visibility · compliance escalation"
+        }
         actions={<NotificationBell />}
       />
+
+      {isBranchStaff(session.role) && <RoleGuideBanner role={session.role} variant="staff" />}
+      {isBranchManager(session.role) && <RoleGuideBanner role={session.role} variant="manager" />}
 
       {isSupervisorView && <IncidentAnalyticsPanel />}
 
@@ -46,6 +63,10 @@ export default async function IncidentsPage() {
         incidents={incidents.map(serializeIncident)}
         canCreate={hasPermission(session.role, Permission.INCIDENT_CREATE)}
         canUpdate={hasPermission(session.role, Permission.INCIDENT_UPDATE)}
+        canAttachEvidence={
+          hasPermission(session.role, Permission.INCIDENT_CREATE) ||
+          hasPermission(session.role, Permission.INCIDENT_UPDATE)
+        }
         canAssign={canAssignIncidents(session.role)}
         showBranch={isSupervisorView}
       />

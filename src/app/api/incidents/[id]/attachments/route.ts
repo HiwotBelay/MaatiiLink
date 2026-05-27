@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { requireApiUser } from "@/lib/api/with-auth";
+import { requireApiUserAny } from "@/lib/api/with-auth";
 import { jsonError, jsonOk } from "@/lib/api/http";
 import { Permission } from "@/lib/rbac";
 import { addIncidentAttachment, getIncidentById, IncidentError } from "@/lib/incident/service";
@@ -8,10 +8,10 @@ import { serializeIncident } from "@/lib/incident/serialize";
 type Params = { params: Promise<{ id: string }> };
 
 export async function POST(request: NextRequest, { params }: Params) {
-  const { error, user } = await requireApiUser(
-    request,
+  const { error, user } = await requireApiUserAny(request, [
+    Permission.INCIDENT_CREATE,
     Permission.INCIDENT_UPDATE,
-  );
+  ]);
   if (error || !user) return error!;
 
   const { id } = await params;

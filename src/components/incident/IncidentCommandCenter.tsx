@@ -31,6 +31,7 @@ type Props = {
   incidents: IncidentRow[];
   canCreate: boolean;
   canUpdate: boolean;
+  canAttachEvidence: boolean;
   canAssign: boolean;
   showBranch?: boolean;
 };
@@ -39,6 +40,7 @@ export function IncidentCommandCenter({
   incidents,
   canCreate,
   canUpdate,
+  canAttachEvidence,
   canAssign,
   showBranch = false,
 }: Props) {
@@ -56,6 +58,7 @@ export function IncidentCommandCenter({
     title: "",
     description: "",
   });
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
 
   const filtered = incidents.filter((i) => {
     if (statusFilter && i.status !== statusFilter) return false;
@@ -78,7 +81,14 @@ export function IncidentCommandCenter({
         setError(data.error ?? "Failed to create incident");
         return;
       }
+      const incidentId = data.incident?.id as string | undefined;
+      if (incidentId && pendingFiles.length > 0) {
+        for (const file of pendingFiles) {
+          await uploadAttachment(incidentId, file, false);
+        }
+      }
       setShowForm(false);
+      setPendingFiles([]);
       setForm({
         category: "SYSTEM_DOWNTIME",
         severity: "MEDIUM",
@@ -115,8 +125,12 @@ export function IncidentCommandCenter({
     }
   }
 
-  async function uploadAttachment(incidentId: string, file: File) {
-    setLoading(true);
+  async function uploadAttachment(
+    incidentId: string,
+    file: File,
+    manageLoading = true,
+  ) {
+    if (manageLoading) setLoading(true);
     setError(null);
     const fd = new FormData();
     fd.append("file", file);
@@ -130,11 +144,11 @@ export function IncidentCommandCenter({
         setError(data.error ?? "Upload failed");
         return;
       }
-      router.refresh();
+      if (manageLoading) router.refresh();
     } catch {
       setError("Network error");
     } finally {
-      setLoading(false);
+      if (manageLoading) setLoading(false);
     }
   }
 
@@ -236,6 +250,29 @@ export function IncidentCommandCenter({
               className="eod-field-control min-h-[100px]"
             />
           </label>
+          {canAttachEvidence && (
+            <label className="mt-4 block text-sm">
+              <span className="incident-field-label">Evidence (optional)</span>
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp,application/pdf"
+                multiple
+                className="eod-field-control text-xs"
+                onChange={(e) => {
+                  const files = e.target.files;
+                  if (files?.length) {
+                    setPendingFiles(Array.from(files));
+                  }
+                  e.target.value = "";
+                }}
+              />
+              {pendingFiles.length > 0 && (
+                <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                  {pendingFiles.length} file(s) will upload after submit
+                </p>
+              )}
+            </label>
+          )}
           <div className="mt-4 flex gap-2">
             <button type="submit" disabled={loading} className="btn-primary px-4 py-2 text-sm">
               Submit incident
@@ -316,28 +353,32 @@ export function IncidentCommandCenter({
                       ))}
                     </ul>
                   )}
-                  {canUpdate && (
+                  {(canUpdate || canAttachEvidence) && (
                     <div className="incident-card-actions">
-                      <StatusActions
-                        current={i.status}
-                        onSelect={(status) => updateStatus(i.id, status)}
-                        disabled={loading}
-                      />
-                      <label className="incident-upload-label">
-                        <span className="btn-secondary px-3 py-1.5 text-xs cursor-pointer">
-                          Attach evidence
-                        </span>
-                        <input
-                          type="file"
-                          accept="image/png,image/jpeg,image/webp,application/pdf"
-                          className="hidden"
-                          onChange={(e) => {
-                            const f = e.target.files?.[0];
-                            if (f) void uploadAttachment(i.id, f);
-                            e.target.value = "";
-                          }}
+                      {canUpdate && (
+                        <StatusActions
+                          current={i.status}
+                          onSelect={(status) => updateStatus(i.id, status)}
+                          disabled={loading}
                         />
-                      </label>
+                      )}
+                      {canAttachEvidence && (
+                        <label className="incident-upload-label">
+                          <span className="btn-secondary px-3 py-1.5 text-xs cursor-pointer">
+                            Attach evidence
+                          </span>
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/webp,application/pdf"
+                            className="hidden"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f) void uploadAttachment(i.id, f);
+                              e.target.value = "";
+                            }}
+                          />
+                        </label>
+                      )}
                     </div>
                   )}
                 </div>

@@ -10,10 +10,54 @@ import {
 describe("rbac", () => {
   it("branch manager can submit EOD", () => {
     expect(hasPermission("BRANCH_MANAGER", Permission.EOD_SUBMIT)).toBe(true);
+    expect(hasPermission("BRANCH_MANAGER", Permission.EOD_DRAFT)).toBe(true);
+    expect(hasPermission("BRANCH_MANAGER", Permission.DIRECTIVE_ACK)).toBe(true);
+    expect(hasPermission("BRANCH_MANAGER", Permission.INCIDENT_UPDATE)).toBe(true);
+    expect(hasPermission("BRANCH_MANAGER", Permission.TICKET_ASSIGN)).toBe(false);
+    expect(hasPermission("BRANCH_MANAGER", Permission.PILOT_VIEW)).toBe(false);
+  });
+
+  it("branch manager differs from staff on accountable actions", () => {
+    expect(hasPermission("BRANCH_STAFF", Permission.EOD_DRAFT)).toBe(false);
+    expect(hasPermission("BRANCH_MANAGER", Permission.EOD_DRAFT)).toBe(true);
+    expect(hasPermission("BRANCH_STAFF", Permission.DIRECTIVE_ACK)).toBe(false);
+    expect(hasPermission("BRANCH_MANAGER", Permission.DIRECTIVE_ACK)).toBe(true);
+    expect(hasPermission("BRANCH_STAFF", Permission.INCIDENT_UPDATE)).toBe(false);
+    expect(hasPermission("BRANCH_MANAGER", Permission.INCIDENT_UPDATE)).toBe(true);
   });
 
   it("branch staff cannot submit EOD", () => {
     expect(hasPermission("BRANCH_STAFF", Permission.EOD_SUBMIT)).toBe(false);
+    expect(hasPermission("BRANCH_STAFF", Permission.EOD_DRAFT)).toBe(false);
+    expect(hasPermission("BRANCH_STAFF", Permission.EOD_VIEW_BRANCH)).toBe(true);
+  });
+
+  it("branch staff incident and knowledge permissions", () => {
+    expect(hasPermission("BRANCH_STAFF", Permission.INCIDENT_CREATE)).toBe(true);
+    expect(hasPermission("BRANCH_STAFF", Permission.INCIDENT_UPDATE)).toBe(false);
+    expect(hasPermission("BRANCH_STAFF", Permission.DIRECTIVE_ACK)).toBe(false);
+    expect(hasPermission("BRANCH_STAFF", Permission.DIRECTIVE_VIEW)).toBe(true);
+    expect(hasPermission("BRANCH_STAFF", Permission.TICKET_CREATE)).toBe(true);
+    expect(hasPermission("BRANCH_STAFF", Permission.TICKET_ASSIGN)).toBe(false);
+    expect(hasPermission("BRANCH_STAFF", Permission.PILOT_FEEDBACK_CREATE)).toBe(true);
+    expect(hasPermission("BRANCH_STAFF", Permission.PILOT_VIEW)).toBe(false);
+  });
+
+  it("EOD POST requires draft permission in API map", () => {
+    expect(getApiRoutePermission("/api/eod", "POST")).toBe(Permission.EOD_DRAFT);
+    expect(getApiRoutePermission("/api/eod", "GET")).toBe(Permission.EOD_VIEW_BRANCH);
+    expect(getApiRoutePermission("/api/eod/abc-123", "GET")).toBe(
+      Permission.EOD_VIEW_BRANCH,
+    );
+  });
+
+  it("staff can upload incident evidence via create permission", () => {
+    expect(
+      getApiRoutePermission("/api/incidents/inc-1/attachments", "POST"),
+    ).toBe(Permission.INCIDENT_CREATE);
+    expect(getApiRoutePermission("/api/incidents/inc-1", "PATCH")).toBe(
+      Permission.INCIDENT_UPDATE,
+    );
   });
 
   it("HO operations can publish directives", () => {

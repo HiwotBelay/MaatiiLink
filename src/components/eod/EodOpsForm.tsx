@@ -39,6 +39,8 @@ type Props = {
   initial: EodOpsFormData;
   readOnly?: boolean;
   canSubmit?: boolean;
+  /** Branch manager accountable submit copy and certification note */
+  managerMode?: boolean;
 };
 
 const SECTIONS = [
@@ -50,7 +52,12 @@ const SECTIONS = [
 
 type SectionId = (typeof SECTIONS)[number]["id"];
 
-export function EodOpsForm({ initial, readOnly = false, canSubmit = false }: Props) {
+export function EodOpsForm({
+  initial,
+  readOnly = false,
+  canSubmit = false,
+  managerMode = false,
+}: Props) {
   const router = useRouter();
   const [form, setForm] = useState(initial);
   const [section, setSection] = useState<SectionId>("cash");
@@ -139,6 +146,18 @@ export function EodOpsForm({ initial, readOnly = false, canSubmit = false }: Pro
 
   return (
     <div className="eod-cockpit-form">
+      {managerMode && !readOnly && (
+        <p className="eod-manager-cert mb-4 rounded-xl border border-[var(--border)] bg-[var(--primary-soft)] px-4 py-3 text-sm text-[var(--foreground)]">
+          <strong>Branch manager certification:</strong> you are submitting this branch&apos;s
+          official end-of-day report. Verify cash bands, complaints, downtime, and risk notes
+          before submit — branch staff cannot submit on your behalf.
+        </p>
+      )}
+      {readOnly && (
+        <p className="eod-view-only-note mb-4 text-sm text-[var(--muted-foreground)]">
+          View-only — your branch manager prepares and submits the daily EOD report.
+        </p>
+      )}
       <div className="eod-cockpit-form-tabs">
         {SECTIONS.map(({ id, label, icon: Icon }) => (
           <button
@@ -307,7 +326,7 @@ export function EodOpsForm({ initial, readOnly = false, canSubmit = false }: Pro
               onClick={submitReport}
               className="btn-primary px-5 py-2.5 text-sm"
             >
-              Submit operations report
+              {managerMode ? "Submit end-of-day report" : "Submit operations report"}
             </button>
           )}
         </div>

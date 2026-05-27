@@ -8,6 +8,7 @@ import { hasPermission, Permission, defaultRouteForRole } from "@/lib/rbac";
 import { listTickets, listAssignableUsers } from "@/lib/ticket/service";
 import { serializeTicket } from "@/lib/ticket/serialize";
 import { prisma } from "@/lib/prisma";
+import { isBranchManager, isBranchStaff } from "@/lib/roles/branch-staff";
 
 export default async function TicketsPage() {
   const session = await getServerSession();
@@ -43,8 +44,18 @@ export default async function TicketsPage() {
       branchLabel={branch ? `${branch.name} (${branch.branchCode})` : null}
     >
       <PageHeader
-        title="Service operations center"
-        description="Department routing · SLA tracking · assignment queue · escalation"
+        title={
+          isBranchStaff(session.role) || isBranchManager(session.role)
+            ? "Service requests"
+            : "Service operations center"
+        }
+        description={
+          isBranchManager(session.role)
+            ? "Open IT, facilities, or cash logistics requests for your branch and track SLA status"
+            : isBranchStaff(session.role)
+              ? "Request IT, facilities, or cash logistics support for your branch"
+              : "Department routing · SLA tracking · assignment queue · escalation"
+        }
       />
 
       {isOpsView && <ServiceOpsDashboard />}

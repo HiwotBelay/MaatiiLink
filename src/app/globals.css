@@ -1282,6 +1282,99 @@ html[data-theme="light"] .ho-badge-missing {
   color: #991b1b;
 }
 
+/* Branch staff / manager role guides */
+.role-guide-banner {
+  margin-bottom: 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background: var(--primary-soft);
+  padding: 1rem 1.25rem;
+}
+
+.role-guide-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.role-guide-list {
+  margin: 0.75rem 0 0;
+  padding-left: 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--foreground);
+}
+
+.role-guide-list li {
+  margin-bottom: 0.35rem;
+}
+
+.role-guide-note {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+
+.role-guide-manager {
+  border-color: color-mix(in srgb, var(--brand-primary) 35%, var(--border));
+  background: color-mix(in srgb, var(--brand-primary) 8%, var(--primary-soft));
+}
+
+.branch-quick-card-primary {
+  border-color: color-mix(in srgb, var(--brand-primary) 45%, var(--border));
+  background: color-mix(in srgb, var(--brand-primary) 6%, var(--card));
+}
+
+.branch-quick-card-urgent {
+  border-color: color-mix(in srgb, #dc2626 40%, var(--border));
+}
+
+.branch-quick-actions {
+  margin-top: 2rem;
+}
+
+.branch-quick-title {
+  margin-bottom: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted-foreground);
+}
+
+.branch-quick-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.branch-quick-card {
+  display: block;
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  padding: 1rem 1.1rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.branch-quick-card:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-card);
+}
+
+.branch-quick-label {
+  display: block;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.branch-quick-desc {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+
 .dashboard-loading {
   display: flex;
   flex-direction: column;

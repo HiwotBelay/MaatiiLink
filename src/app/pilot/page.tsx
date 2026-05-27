@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { PilotDashboard } from "@/components/pilot/PilotDashboard";
 import { getServerSession } from "@/lib/auth/server";
 import { hasPermission, Permission } from "@/lib/rbac";
+import { isBranchStaff } from "@/lib/roles/branch-staff";
 import { computePilotKpis } from "@/lib/pilot/kpis";
 import { listPilotFeedback } from "@/lib/pilot/feedback";
 import { PILOT_KPI_TARGETS } from "@/lib/pilot/constants";
@@ -14,6 +16,7 @@ export default async function PilotPage() {
 
   const canView = hasPermission(session.role, Permission.PILOT_VIEW);
   const canSubmit = hasPermission(session.role, Permission.PILOT_FEEDBACK_CREATE);
+  const staffOnly = isBranchStaff(session.role) && canSubmit && !canView;
 
   if (!canView && !canSubmit) {
     redirect("/dashboard");
@@ -21,7 +24,7 @@ export default async function PilotPage() {
 
   const [kpis, feedback, pilotBranches] = await Promise.all([
     canView ? computePilotKpis(14) : null,
-    listPilotFeedback(),
+    canView ? listPilotFeedback() : [],
     prisma.branch.findMany({
       where: { isPilotBranch: true },
       orderBy: { branchCode: "asc" },
@@ -31,17 +34,19 @@ export default async function PilotPage() {
 
   return (
     <AppShell user={session}>
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Pilot program</h1>
-        <p className="text-slate-500">
-          Phase 5 — live branch trial ({pilotBranches.length} pilot outlets)
-        </p>
-      </header>
+      <PageHeader
+        title={staffOnly ? "Pilot feedback" : "Pilot program"}
+        description={
+          staffOnly
+            ? "Report rollout issues for your branch. HO and your supervisor review submissions."
+            : `Smart branch trial · ${pilotBranches.length} pilot outlet${pilotBranches.length === 1 ? "" : "s"}`
+        }
+      />
 
-      {pilotBranches.length > 0 && (
+      {canView && pilotBranches.length > 0 && (
         <section className="polished-card mb-8 rounded-[1.5rem] p-5 text-sm">
-          <p className="font-medium text-[#00529b]">Pilot branches</p>
-          <ul className="mt-2 list-inside list-disc text-slate-700">
+          <p className="font-medium text-[var(--brand-primary)]">Pilot branches</p>
+          <ul className="mt-2 list-inside list-disc text-[var(--muted-foreground)]">
             {pilotBranches.map((b) => (
               <li key={b.branchCode}>
                 {b.branchCode} — {b.name} ({b.region})
@@ -68,13 +73,6 @@ export default async function PilotPage() {
           canTriage={hasPermission(session.role, Permission.PILOT_FEEDBACK_TRIAGE)}
           canSubmitFeedback={canSubmit}
         />
-      )}
-
-      {!kpis && canSubmit && (
-        <p className="mb-4 text-sm text-slate-600">
-          Use the form below to report pilot issues. Your supervisor and HO team will
-          triage feedback within 48 hours.
-        </p>
       )}
 
       {!kpis && canSubmit && (

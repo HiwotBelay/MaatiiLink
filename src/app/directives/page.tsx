@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { RoleGuideBanner } from "@/components/layout/RoleGuideBanner";
 import { KnowledgeHub } from "@/components/directive/KnowledgeHub";
+import { isBranchManager, isBranchStaff } from "@/lib/roles/branch-staff";
 import { KnowledgeAnalytics } from "@/components/directive/KnowledgeAnalytics";
 import { getServerSession } from "@/lib/auth/server";
 import { hasPermission, Permission, defaultRouteForRole } from "@/lib/rbac";
@@ -9,9 +11,16 @@ import { listDirectives, getPinnedAndLatest } from "@/lib/directive/service";
 import { serializeDirective } from "@/lib/directive/serialize";
 import { prisma } from "@/lib/prisma";
 
-export default async function DirectivesPage() {
+type PageProps = {
+  searchParams: Promise<{ pendingAck?: string }>;
+};
+
+export default async function DirectivesPage({ searchParams }: PageProps) {
   const session = await getServerSession();
   if (!session) redirect("/login");
+
+  const params = await searchParams;
+  const pendingAck = params.pendingAck === "1";
 
   if (!hasPermission(session.role, Permission.DIRECTIVE_VIEW)) {
     redirect(defaultRouteForRole(session.role));
@@ -47,9 +56,29 @@ export default async function DirectivesPage() {
       branchLabel={branch ? `${branch.name} (${branch.branchCode})` : null}
     >
       <PageHeader
-        title="Operational knowledge & procedures"
-        description="Find the latest Head Office directives by area — search, category, or quick lookup. No phone calls to HO for routine procedures."
+        title={
+          isBranchManager(session.role)
+            ? "HO policies & acknowledgments"
+            : "Operational knowledge & procedures"
+        }
+        description={
+          isBranchManager(session.role)
+            ? "Read mandatory Head Office procedures and acknowledge on behalf of your branch before deadlines"
+            : "Find the latest Head Office directives by area — search, category, or quick lookup. No phone calls to HO for routine procedures."
+        }
       />
+
+      {isBranchStaff(session.role) && (
+        <p className="mb-4 rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 py-3 text-sm text-[var(--muted-foreground)]">
+          <strong className="text-[var(--foreground)]">Branch staff:</strong> you can read and
+          search all procedures. Mandatory acknowledgments are done by your{" "}
+          <strong className="text-[var(--foreground)]">branch manager</strong>.
+        </p>
+      )}
+
+      {isBranchManager(session.role) && (
+        <RoleGuideBanner role={session.role} variant="manager" />
+      )}
 
       {showAnalytics && <KnowledgeAnalytics />}
 
@@ -59,6 +88,9 @@ export default async function DirectivesPage() {
         latest={latest.map((d) => serializeDirective(d, serializeOpts))}
         canAck={hasPermission(session.role, Permission.DIRECTIVE_ACK)}
         canPublish={hasPermission(session.role, Permission.DIRECTIVE_PUBLISH)}
+        defaultPendingAck={
+          pendingAck && hasPermission(session.role, Permission.DIRECTIVE_ACK)
+        }
       />
     </AppShell>
   );

@@ -17,6 +17,7 @@ import {
   Users,
 } from "lucide-react";
 import { MaatiiLinkLogo } from "@/components/brand/MaatiiLinkLogo";
+import { roleDisplayName } from "@/lib/role-labels";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import {
   defaultRouteForRole,
@@ -170,7 +171,7 @@ export function AppSidebar({ user, branchLabel }: Props) {
               {user.name}
             </p>
             <p className="truncate text-xs text-[var(--muted-foreground)]">
-              {user.role.replace(/_/g, " ")}
+              {roleDisplayName(user.role)}
               {branchLabel ? ` · ${branchLabel}` : ""}
             </p>
           </div>

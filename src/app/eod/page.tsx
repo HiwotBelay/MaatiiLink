@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { RoleGuideBanner } from "@/components/layout/RoleGuideBanner";
 import { EodOpsForm, type EodOpsFormData } from "@/components/eod/EodOpsForm";
+import { isBranchManager, isBranchStaff } from "@/lib/roles/branch-staff";
 import { EodCockpitHeader } from "@/components/eod/EodCockpitHeader";
 import { EodAlertsPanel } from "@/components/eod/EodAlertsPanel";
 import { EodHistory } from "@/components/eod/EodHistory";
@@ -127,9 +129,24 @@ export default async function EodPage({ searchParams }: PageProps) {
   return (
     <AppShell user={session} branchLabel={branchLabel}>
       <PageHeader
-        title="Operations cockpit"
-        description="Smart branch daily reporting · configurable windows · supervisor review"
+        title={
+          isBranchStaff(session.role)
+            ? "End of day (view only)"
+            : isBranchManager(session.role)
+              ? "End of day reporting"
+              : "Operations cockpit"
+        }
+        description={
+          isBranchStaff(session.role)
+            ? "Branch manager prepares and submits EOD · you can review status and history"
+            : isBranchManager(session.role)
+              ? "Complete all sections, save draft during the day, and submit before the Addis Ababa cut-off"
+              : "Smart branch daily reporting · configurable windows · supervisor review"
+        }
       />
+
+      {isBranchStaff(session.role) && <RoleGuideBanner role={session.role} variant="staff" />}
+      {isBranchManager(session.role) && <RoleGuideBanner role={session.role} variant="manager" />}
 
       <div className="eod-cockpit-layout">
         <div className="eod-cockpit-main">
@@ -145,6 +162,7 @@ export default async function EodPage({ searchParams }: PageProps) {
               initial={formData}
               readOnly={readOnly}
               canSubmit={canSubmit}
+              managerMode={isBranchManager(session.role)}
             />
           </div>
 

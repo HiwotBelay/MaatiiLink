@@ -77,6 +77,22 @@ export async function requireApiUser(
   return { error: null, user };
 }
 
+/** Require the session user to hold at least one of the given permissions. */
+export async function requireApiUserAny(
+  request: NextRequest,
+  permissions: PermissionKey[],
+) {
+  const user = await getApiUser(request);
+  if (!user) {
+    return { error: jsonUnauthorized("Session expired or invalid") as Response, user: null };
+  }
+  const allowed = permissions.some((p) => hasPermission(user.role, p));
+  if (!allowed) {
+    return { error: jsonForbidden() as Response, user: null };
+  }
+  return { error: null, user };
+}
+
 export async function requireBranchResourceAccess(
   user: ApiUser,
   resourceBranchId: string,

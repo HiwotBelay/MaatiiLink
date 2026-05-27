@@ -17,6 +17,8 @@ type Props = {
   latest: SerializedDirective[];
   canAck: boolean;
   canPublish: boolean;
+  /** Pre-filter mandatory + unread (branch manager pending acknowledgments). */
+  defaultPendingAck?: boolean;
 };
 
 type Filters = {
@@ -36,6 +38,7 @@ export function KnowledgeHub({
   latest,
   canAck,
   canPublish,
+  defaultPendingAck = false,
 }: Props) {
   const router = useRouter();
   const [directives, setDirectives] = useState(initialDirectives);
@@ -44,9 +47,9 @@ export function KnowledgeHub({
     category: "",
     critical: false,
     recent: false,
-    mandatory: false,
+    mandatory: defaultPendingAck,
     sop: false,
-    unread: false,
+    unread: defaultPendingAck,
     pinned: false,
   });
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -90,6 +93,19 @@ export function KnowledgeHub({
   }, []);
 
   useEffect(() => {
+    if (defaultPendingAck) {
+      void runSearch({
+        q: "",
+        category: "",
+        critical: false,
+        recent: false,
+        mandatory: true,
+        sop: false,
+        unread: true,
+        pinned: false,
+      });
+      return;
+    }
     if (initialDirectives.length === 0) {
       void runSearch({
         q: "",
@@ -102,7 +118,7 @@ export function KnowledgeHub({
         pinned: false,
       });
     }
-  }, [initialDirectives.length, runSearch]);
+  }, [defaultPendingAck, initialDirectives.length, runSearch]);
 
   function applyFilters(patch: Partial<Filters>) {
     const next = { ...filters, ...patch };
@@ -166,6 +182,12 @@ export function KnowledgeHub({
 
   return (
     <div className="knowledge-hub">
+      {canAck && defaultPendingAck && (
+        <p className="mb-4 rounded-xl border border-[var(--border)] bg-[var(--primary-soft)] px-4 py-3 text-sm text-[var(--foreground)]">
+          Showing <strong>mandatory policies</strong> that still need branch acknowledgment.
+          Open each item, confirm you have read it, then acknowledge for your outlet.
+        </p>
+      )}
       <div className="knowledge-hub-layout">
         <aside className="knowledge-sidebar">
           <h2 className="knowledge-sidebar-title">Categories</h2>
