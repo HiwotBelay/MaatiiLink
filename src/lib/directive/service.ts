@@ -1,8 +1,13 @@
-import type { Role } from "@prisma/client";
+import type { DirectiveCategory, DirectivePriority, Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { writeAuditLog } from "@/lib/audit";
 import { hasPermission, Permission } from "@/lib/rbac";
 import { notifyDirectivePublished } from "@/lib/notifications/email";
+import {
+  buildDirectiveWhere,
+  directiveOrderBy,
+  type DirectiveSearchFilters,
+} from "./search";
 import type { DirectiveAckInput, DirectivePublishInput } from "./validation";
 
 export class DirectiveError extends Error {
@@ -17,26 +22,41 @@ export class DirectiveError extends Error {
 const directiveInclude = {
   publishedBy: { select: { name: true } },
   acknowledgments: true,
+  reads: true,
 } as const;
 
-export async function listDirectives(user: {
+type DirectiveUser = {
+  id: string;
   role: Role;
   branchId: string | null;
-}) {
+  name?: string;
+};
+
+export async function searchDirectives(
+  user: DirectiveUser,
+  filters: DirectiveSearchFilters = {},
+) {
   if (!hasPermission(user.role, Permission.DIRECTIVE_VIEW)) {
     throw new DirectiveError("Forbidden", "FORBIDDEN");
   }
 
+  const where = buildDirectiveWhere({
+    ...filters,
+    userId: filters.unread ? user.id : undefined,
+  });
+
   return prisma.directive.findMany({
-    orderBy: { publishedAt: "desc" },
+    where,
+    orderBy: directiveOrderBy(filters),
     include: directiveInclude,
   });
 }
 
-export async function getDirectiveById(
-  user: { role: Role; branchId: string | null },
-  id: string,
-) {
+export async function listDirectives(user: DirectiveUser) {
+  return searchDirectives(user, {});
+}
+
+export async function getDirectiveById(user: DirectiveUser, id: string) {
   const directive = await prisma.directive.findUnique({
     where: { id },
     include: directiveInclude,
@@ -49,8 +69,30 @@ export async function getDirectiveById(
   return directive;
 }
 
+export async function markDirectiveRead(user: DirectiveUser, directiveId: string) {
+  if (!hasPermission(user.role, Permission.DIRECTIVE_VIEW)) {
+    throw new DirectiveError("Forbidden", "FORBIDDEN");
+  }
+
+  const directive = await prisma.directive.findUnique({
+    where: { id: directiveId },
+    select: { id: true },
+  });
+  if (!directive) throw new DirectiveError("Not found", "NOT_FOUND");
+
+  await prisma.directiveRead.upsert({
+    where: {
+      directiveId_userId: { directiveId, userId: user.id },
+    },
+    create: { directiveId, userId: user.id },
+    update: { readAt: new Date() },
+  });
+
+  return { ok: true };
+}
+
 export async function publishDirective(
-  user: { id: string; role: Role; name: string },
+  user: DirectiveUser & { name: string },
   input: DirectivePublishInput,
 ) {
   if (!hasPermission(user.role, Permission.DIRECTIVE_PUBLISH)) {
@@ -61,11 +103,21 @@ export async function publishDirective(
     ? new Date(`${input.deadlineAt.slice(0, 10)}T23:59:59.000Z`)
     : null;
 
+  const isCritical =
+    input.isCritical || input.priority === "CRITICAL";
+
   const directive = await prisma.directive.create({
     data: {
       title: input.title.trim(),
+      summary: input.summary?.trim() || null,
       body: input.body.trim(),
-      isCritical: input.isCritical ?? false,
+      category: input.category as DirectiveCategory,
+      priority: input.priority as DirectivePriority,
+      keywords: input.keywords.map((k) => k.trim().toLowerCase()).filter(Boolean),
+      isCritical,
+      isPinned: input.isPinned ?? false,
+      isMandatory: input.isMandatory ?? false,
+      isSop: input.isSop ?? false,
       deadlineAt,
       publishedById: user.id,
     },
@@ -77,7 +129,11 @@ export async function publishDirective(
     action: "DIRECTIVE_PUBLISH",
     entityType: "Directive",
     entityId: directive.id,
-    metadata: { isCritical: directive.isCritical },
+    metadata: {
+      isCritical: directive.isCritical,
+      category: directive.category,
+      isMandatory: directive.isMandatory,
+    },
   });
 
   void notifyDirectivePublished({
@@ -92,7 +148,7 @@ export async function publishDirective(
 }
 
 export async function acknowledgeDirective(
-  user: { id: string; role: Role; branchId: string | null },
+  user: DirectiveUser,
   directiveId: string,
   input: DirectiveAckInput,
 ) {
@@ -130,6 +186,14 @@ export async function acknowledgeDirective(
     },
   });
 
+  await prisma.directiveRead.upsert({
+    where: {
+      directiveId_userId: { directiveId, userId: user.id },
+    },
+    create: { directiveId, userId: user.id },
+    update: { readAt: new Date() },
+  });
+
   await writeAuditLog({
     userId: user.id,
     action: "DIRECTIVE_ACK",
@@ -145,6 +209,7 @@ export async function countOverdueAcksForBranch(branchId: string) {
   const now = new Date();
   const directives = await prisma.directive.findMany({
     where: {
+      isMandatory: true,
       deadlineAt: { lt: now },
     },
     select: {
@@ -157,4 +222,16 @@ export async function countOverdueAcksForBranch(branchId: string) {
   });
 
   return directives.filter((d) => d.acknowledgments.length === 0).length;
+}
+
+export async function getPinnedAndLatest(user: DirectiveUser) {
+  const [pinned, latest] = await Promise.all([
+    searchDirectives(user, { pinned: true, critical: false }),
+    prisma.directive.findMany({
+      orderBy: { publishedAt: "desc" },
+      take: 8,
+      include: directiveInclude,
+    }),
+  ]);
+  return { pinned, latest };
 }

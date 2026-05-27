@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { ArrowRight, LockKeyhole, ShieldCheck } from "lucide-react";
 import { AuthGlowCard, AuthPageShell } from "@/components/auth/AuthPageShell";
+import { LoginAlerts } from "@/components/auth/LoginAlerts";
 import { LoginForm } from "@/components/auth/LoginForm";
 
 export default function LoginPage() {
@@ -20,6 +21,7 @@ export default function LoginPage() {
           fallback={<p className="mt-6 text-sm text-[var(--muted-foreground)]">Loading…</p>}
         >
           <div className="mt-7">
+            <LoginAlerts />
             <LoginForm />
           </div>
         </Suspense>

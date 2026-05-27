@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { SESSION_COOKIE } from "@/lib/auth/constants";
-import { verifySessionToken } from "@/lib/auth/session";
+import { sessionCookieOptions, verifySessionToken } from "@/lib/auth/session";
 import {
+  canAccessUiRoute,
   defaultRouteForRole,
-  hasPermission,
   isPublicApiPath,
-  Permission,
 } from "@/lib/rbac";
+import { isApiRouteAllowed } from "@/lib/security/route-permissions";
 import { isCsrfSafe } from "@/lib/security/csrf";
 
 const PUBLIC_UI = ["/", "/login", "/signup"];
@@ -39,11 +39,28 @@ export async function middleware(request: NextRequest) {
     if (!session) {
       return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     }
+    if (!isApiRouteAllowed(session.role, pathname, request.method)) {
+      return NextResponse.json({ ok: false, error: "Forbidden" }, { status: 403 });
+    }
     return NextResponse.next();
   }
 
   if (pathname === "/login" || pathname === "/signup") {
-    if (session) {
+    const reason = request.nextUrl.searchParams.get("reason");
+    // Stale JWT: show login and drop cookie (prevents /login ↔ /dashboard loop)
+    if (session && reason) {
+      const res = NextResponse.next();
+      const opts = sessionCookieOptions();
+      res.cookies.set(opts.name, "", {
+        httpOnly: opts.httpOnly,
+        secure: opts.secure,
+        sameSite: opts.sameSite,
+        path: opts.path,
+        maxAge: 0,
+      });
+      return res;
+    }
+    if (session && !reason) {
       return NextResponse.redirect(
         new URL(defaultRouteForRole(session.role), request.url),
       );
@@ -55,9 +72,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const isPublicUi = PUBLIC_UI.some(
-    (p) => pathname === p,
-  );
+  const isPublicUi = PUBLIC_UI.some((p) => pathname === p);
 
   if (!isPublicUi && !session) {
     const login = new URL("/login", request.url);
@@ -65,39 +80,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(login);
   }
 
-  if (session && pathname.startsWith("/supervisor")) {
-    const allowed = ["SUPERVISOR", "HO_ADMIN", "AUDITOR"].includes(session.role);
-    if (!allowed) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
-  }
-
-  if (session && pathname.startsWith("/admin")) {
-    if (session.role !== "HO_ADMIN") {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
-  }
-
-  if (session && pathname.startsWith("/ops")) {
-    if (session.role !== "HO_ADMIN") {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
-  }
-
-  if (session && pathname.startsWith("/audit")) {
-    const allowed = ["HO_ADMIN", "AUDITOR", "SUPERVISOR"].includes(session.role);
-    if (!allowed) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
-  }
-
-  if (session && pathname.startsWith("/pilot")) {
-    const canPilot =
-      hasPermission(session.role, Permission.PILOT_VIEW) ||
-      hasPermission(session.role, Permission.PILOT_FEEDBACK_CREATE);
-    if (!canPilot) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
+  if (session && !canAccessUiRoute(session.role, pathname)) {
+    return NextResponse.redirect(new URL(defaultRouteForRole(session.role), request.url));
   }
 
   return NextResponse.next();

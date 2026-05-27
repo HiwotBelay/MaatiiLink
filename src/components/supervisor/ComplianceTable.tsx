@@ -25,7 +25,7 @@ export function ComplianceTable({ rows }: Props) {
   async function lockReport(reportId: string) {
     setLoadingId(reportId);
     try {
-      const res = await fetch(`/api/eod/${reportId}/lock`, { method: "POST" });
+      const res = await fetch(`/api/eod/${reportId}/review`, { method: "POST" });
       if (res.ok) router.refresh();
     } finally {
       setLoadingId(null);
@@ -73,14 +73,15 @@ export function ComplianceTable({ rows }: Props) {
                 </span>
               </td>
               <td className="px-4 py-3">
-                {r.eodStatus === "SUBMITTED" && r.reportId && (
+                {["SUBMITTED", "LATE", "ESCALATED"].includes(r.eodStatus) &&
+                  r.reportId && (
                   <button
                     type="button"
                     disabled={loadingId === r.reportId}
                     onClick={() => lockReport(r.reportId!)}
                     className="text-sm font-bold text-[var(--primary)] hover:underline disabled:opacity-50"
                   >
-                    Lock EOD
+                    Approve & lock
                   </button>
                 )}
               </td>
@@ -95,10 +96,11 @@ export function ComplianceTable({ rows }: Props) {
 function EodStatusPill({ status }: { status: string }) {
   const styles: Record<string, string> = {
     MISSING: "bg-red-100 text-red-800",
+    PENDING: "bg-slate-100 text-slate-700",
     LATE: "bg-orange-100 text-orange-800",
-    DRAFT: "bg-slate-100 text-slate-700",
     SUBMITTED: "bg-blue-100 text-blue-800",
-    LOCKED: "bg-emerald-100 text-emerald-800",
+    ESCALATED: "bg-amber-100 text-amber-900",
+    REVIEWED: "bg-emerald-100 text-emerald-800",
   };
   return (
     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${styles[status] ?? ""}`}>

@@ -11,6 +11,7 @@ describe("session", () => {
       name: "Test User",
       role: "BRANCH_MANAGER",
       branchId: "branch-1",
+      sessionId: "sess-test-1",
     });
 
     const payload = await verifySessionToken(token);
@@ -28,6 +29,7 @@ describe("session", () => {
       name: "Test",
       role: "BRANCH_STAFF",
       branchId: null,
+      sessionId: "sess-test-2",
     });
     const bad = token.slice(0, -4) + "xxxx";
     expect(await verifySessionToken(bad)).toBeNull();

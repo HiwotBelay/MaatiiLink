@@ -1,5 +1,6 @@
 import { PrismaClient, Role } from "@prisma/client";
 import { hash } from "bcryptjs";
+import { seedDirectives } from "./seed-directives";
 
 const prisma = new PrismaClient();
 
@@ -58,22 +59,22 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: "admin@maatiilink.local" },
-    update: {},
+    update: { role: Role.SUPER_ADMIN, name: "Super Admin" },
     create: {
       email: "admin@maatiilink.local",
-      name: "HO Admin (Dev)",
+      name: "Super Admin",
       passwordHash,
-      role: Role.HO_ADMIN,
+      role: Role.SUPER_ADMIN,
       branchId: hq.id,
     },
   });
 
   await prisma.user.upsert({
     where: { email: "manager@maatiilink.local" },
-    update: {},
+    update: { name: "Branch Manager" },
     create: {
       email: "manager@maatiilink.local",
-      name: "Branch Manager (Dev)",
+      name: "Branch Manager",
       passwordHash,
       role: Role.BRANCH_MANAGER,
       branchId: smart.id,
@@ -82,10 +83,10 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: "manager2@maatiilink.local" },
-    update: {},
+    update: { name: "Branch Manager Merkato" },
     create: {
       email: "manager2@maatiilink.local",
-      name: "Branch Manager Merkato (Dev)",
+      name: "Branch Manager Merkato",
       passwordHash,
       role: Role.BRANCH_MANAGER,
       branchId: traditional.id,
@@ -94,50 +95,88 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: "supervisor@maatiilink.local" },
-    update: {},
+    update: { role: Role.REGIONAL_SUPERVISOR, name: "Regional Supervisor" },
     create: {
       email: "supervisor@maatiilink.local",
-      name: "District Supervisor (Dev)",
+      name: "Regional Supervisor",
       passwordHash,
-      role: Role.SUPERVISOR,
+      role: Role.REGIONAL_SUPERVISOR,
     },
   });
 
   await prisma.user.upsert({
     where: { email: "auditor@maatiilink.local" },
-    update: {},
+    update: { role: Role.AUDITOR_READ_ONLY, name: "Internal Auditor" },
     create: {
       email: "auditor@maatiilink.local",
-      name: "Internal Auditor (Dev)",
+      name: "Internal Auditor",
       passwordHash,
-      role: Role.AUDITOR,
+      role: Role.AUDITOR_READ_ONLY,
     },
   });
 
   await prisma.user.upsert({
     where: { email: "staff@maatiilink.local" },
-    update: {},
+    update: { name: "Branch Staff" },
     create: {
       email: "staff@maatiilink.local",
-      name: "Branch Staff (Dev)",
+      name: "Branch Staff",
       passwordHash,
       role: Role.BRANCH_STAFF,
       branchId: smart.id,
     },
   });
 
+  await prisma.user.upsert({
+    where: { email: "compliance@maatiilink.local" },
+    update: { name: "Compliance Officer" },
+    create: {
+      email: "compliance@maatiilink.local",
+      name: "Compliance Officer",
+      passwordHash,
+      role: Role.COMPLIANCE_OFFICER,
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email: "it@maatiilink.local" },
+    update: { name: "IT Support" },
+    create: {
+      email: "it@maatiilink.local",
+      name: "IT Support",
+      passwordHash,
+      role: Role.IT_SUPPORT,
+    },
+  });
+
+  const hoOps = await prisma.user.upsert({
+    where: { email: "hoops@maatiilink.local" },
+    update: { name: "HO Operations" },
+    create: {
+      email: "hoops@maatiilink.local",
+      name: "HO Operations",
+      passwordHash,
+      role: Role.HO_OPERATIONS,
+      branchId: hq.id,
+    },
+  });
+
+  const directiveCount = await seedDirectives(prisma, hoOps.id);
+
   console.log(
     "Seed complete:",
     createdBranches.map((b) => b.branchCode),
   );
   console.log("Dev logins (change passwords before pilot):");
-  console.log("  admin@maatiilink.local / ChangeMe123!");
+  console.log("  admin@maatiilink.local / ChangeMe123! (Super Admin)");
   console.log("  manager@maatiilink.local / ChangeMe123!");
-  console.log("  manager2@maatiilink.local / ChangeMe123!");
   console.log("  supervisor@maatiilink.local / ChangeMe123!");
   console.log("  auditor@maatiilink.local / ChangeMe123!");
   console.log("  staff@maatiilink.local / ChangeMe123!");
-  console.log("All seed branches flagged isPilotBranch=true for Phase 5 dev.");
+  console.log("  compliance@maatiilink.local / ChangeMe123!");
+  console.log("  it@maatiilink.local / ChangeMe123!");
+  console.log("  hoops@maatiilink.local / ChangeMe123!");
+  console.log(`  Knowledge base: ${directiveCount} new HO procedures seeded (by title)`);
 }
 
 main()

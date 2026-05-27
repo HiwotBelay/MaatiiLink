@@ -21,7 +21,7 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 const STORAGE_KEY = "maatiilink-theme";
 
 function readThemeFromDom(): Theme {
-  if (typeof document === "undefined") return "light";
+  if (typeof document === "undefined") return "dark";
   return document.documentElement.getAttribute("data-theme") === "dark"
     ? "dark"
     : "light";
@@ -55,7 +55,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const theme = useSyncExternalStore<Theme>(
     subscribeToTheme,
     readThemeFromDom,
-    (): Theme => "light",
+    (): Theme => "dark",
   );
 
   const setTheme = useCallback((next: Theme) => {

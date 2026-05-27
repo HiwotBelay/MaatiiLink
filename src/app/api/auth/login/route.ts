@@ -1,9 +1,10 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { writeAuditLog } from "@/lib/audit";
+import { AuditModule, writeAuditLog } from "@/lib/audit";
 import { verifyPassword } from "@/lib/auth/password";
-import { createSessionToken, sessionCookieOptions } from "@/lib/auth/session";
+import { sessionCookieOptions } from "@/lib/auth/session";
+import { createUserSession } from "@/lib/auth/session-manager";
 import { defaultRouteForRole } from "@/lib/rbac";
 import {
   jsonError,
@@ -14,6 +15,9 @@ import {
   checkLoginRateLimit,
   resetLoginRateLimit,
 } from "@/lib/api/rate-limit";
+import { isAccountLocked, registerFailedLogin, resetFailedLogins } from "@/lib/security/account-lock";
+import { recordLoginActivity } from "@/lib/security/login-activity";
+import { getRequestSecurityContext } from "@/lib/security/request-context";
 
 const loginSchema = z.object({
   email: z.string().email().max(255),
@@ -22,12 +26,9 @@ const loginSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const ip =
-      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-      request.headers.get("x-real-ip") ??
-      "unknown";
+    const ctx = getRequestSecurityContext(request);
 
-    if (!checkLoginRateLimit(ip)) {
+    if (!checkLoginRateLimit(ctx.ipAddress)) {
       return jsonError("Too many login attempts. Try again later.", 429);
     }
 
@@ -51,30 +52,96 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user || !user.isActive) {
+      await recordLoginActivity({
+        email,
+        success: false,
+        failureReason: "INVALID_CREDENTIALS",
+        ipAddress: ctx.ipAddress,
+        userAgent: ctx.userAgent,
+      });
+      await writeAuditLog({
+        action: "LOGIN_FAILED",
+        module: AuditModule.AUTH,
+        entityType: "User",
+        metadata: { email, reason: "invalid_credentials" },
+        request: ctx,
+      });
       return jsonError("Invalid email or password", 401);
+    }
+
+    if (isAccountLocked(user.lockedUntil)) {
+      await recordLoginActivity({
+        email,
+        success: false,
+        userId: user.id,
+        branchId: user.branchId,
+        failureReason: "ACCOUNT_LOCKED",
+        ipAddress: ctx.ipAddress,
+        userAgent: ctx.userAgent,
+      });
+      return jsonError(
+        "Account temporarily locked due to failed sign-in attempts. Try again later or contact IT.",
+        423,
+      );
     }
 
     const valid = await verifyPassword(parsed.data.password, user.passwordHash);
     if (!valid) {
+      await registerFailedLogin(user.id);
+      await recordLoginActivity({
+        email,
+        success: false,
+        userId: user.id,
+        branchId: user.branchId,
+        failureReason: "INVALID_PASSWORD",
+        ipAddress: ctx.ipAddress,
+        userAgent: ctx.userAgent,
+      });
+      await writeAuditLog({
+        userId: user.id,
+        action: "LOGIN_FAILED",
+        module: AuditModule.AUTH,
+        entityType: "User",
+        entityId: user.id,
+        branchId: user.branchId,
+        metadata: { reason: "invalid_password" },
+        request: ctx,
+      });
       return jsonError("Invalid email or password", 401);
     }
 
-    resetLoginRateLimit(ip);
+    resetLoginRateLimit(ctx.ipAddress);
+    await resetFailedLogins(user.id);
 
-    const token = await createSessionToken({
-      sub: user.id,
+    const { token } = await createUserSession({
+      userId: user.id,
       email: user.email,
       name: user.name,
       role: user.role,
       branchId: user.branchId,
+      ipAddress: ctx.ipAddress,
+      userAgent: ctx.userAgent,
+      deviceLabel: ctx.deviceLabel,
+    });
+
+    await recordLoginActivity({
+      email,
+      success: true,
+      userId: user.id,
+      branchId: user.branchId,
+      ipAddress: ctx.ipAddress,
+      userAgent: ctx.userAgent,
     });
 
     await writeAuditLog({
       userId: user.id,
       action: "LOGIN",
+      module: AuditModule.AUTH,
       entityType: "User",
       entityId: user.id,
-      metadata: { email: user.email, role: user.role },
+      branchId: user.branchId,
+      newValue: { role: user.role, email: user.email },
+      request: ctx,
     });
 
     const response = jsonOk({

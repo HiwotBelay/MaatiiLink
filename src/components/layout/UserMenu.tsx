@@ -4,12 +4,19 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Role } from "@prisma/client";
-import { ChevronUp, Home, LogOut, Settings, ShieldCheck } from "lucide-react";
+import { ChevronUp, LogOut, Settings, ShieldCheck } from "lucide-react";
 import { roleDisplayName, roleSubtitle, userInitials } from "@/lib/role-labels";
+import { hasPermission, Permission } from "@/lib/rbac";
 
 type Props = {
   user: { name: string; email: string; role: Role };
 };
+
+function settingsHref(role: Role) {
+  if (hasPermission(role, Permission.ADMIN_USERS)) return "/admin";
+  if (hasPermission(role, Permission.OPS_VIEW)) return "/ops";
+  return "/dashboard";
+}
 
 export function UserMenu({ user }: Props) {
   const router = useRouter();
@@ -79,26 +86,14 @@ export function UserMenu({ user }: Props) {
           <div className="user-menu-divider" />
 
           <Link
-            href="/"
+            href={settingsHref(user.role)}
             className="user-menu-item"
             role="menuitem"
             onClick={() => setOpen(false)}
           >
-            <Home className="h-4 w-4" />
-            Home
+            <Settings className="h-4 w-4" />
+            Settings
           </Link>
-
-          {user.role === "HO_ADMIN" && (
-            <Link
-              href="/admin"
-              className="user-menu-item"
-              role="menuitem"
-              onClick={() => setOpen(false)}
-            >
-              <Settings className="h-4 w-4" />
-              Settings
-            </Link>
-          )}
 
           <button
             type="button"

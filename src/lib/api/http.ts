@@ -9,12 +9,12 @@ export function jsonError(message: string, status: number) {
   return NextResponse.json({ ok: false, error: message }, { status });
 }
 
-export function jsonUnauthorized() {
-  return jsonError("Unauthorized", 401);
+export function jsonUnauthorized(message = "Unauthorized") {
+  return jsonError(message, 401);
 }
 
-export function jsonForbidden() {
-  return jsonError("Forbidden", 403);
+export function jsonForbidden(message = "Forbidden") {
+  return jsonError(message, 403);
 }
 
 export function jsonValidation(error: ZodError) {

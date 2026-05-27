@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import type { Role } from "@prisma/client";
 import {
   Activity,
+  Building2,
   ClipboardList,
   FileText,
   LayoutDashboard,
@@ -16,8 +17,14 @@ import {
   Users,
 } from "lucide-react";
 import { MaatiiLinkLogo } from "@/components/brand/MaatiiLinkLogo";
+import { roleDisplayName } from "@/lib/role-labels";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { hasPermission, Permission } from "@/lib/rbac";
+import {
+  defaultRouteForRole,
+  hasPermission,
+  isHeadOfficeHomeRole,
+  Permission,
+} from "@/lib/rbac";
 
 const ICONS = {
   dashboard: LayoutDashboard,
@@ -26,6 +33,7 @@ const ICONS = {
   directives: Megaphone,
   tickets: Ticket,
   supervisor: ClipboardList,
+  ho: Building2,
   pilot: Rocket,
   audit: Shield,
   admin: Users,
@@ -39,19 +47,35 @@ type Props = {
 
 export function AppSidebar({ user, branchLabel }: Props) {
   const pathname = usePathname();
+  const homeHref = defaultRouteForRole(user.role);
+  const isHo = isHeadOfficeHomeRole(user.role);
 
   const items = [
     {
       href: "/dashboard",
       label: "Dashboard",
       icon: "dashboard" as const,
-      show: !["SUPERVISOR", "HO_ADMIN", "AUDITOR"].includes(user.role),
+      show:
+        !hasPermission(user.role, Permission.DASHBOARD_SUPERVISOR) && !isHo,
+    },
+    {
+      href: "/ho",
+      label: "Head Office",
+      icon: "ho" as const,
+      show: isHo,
     },
     {
       href: "/supervisor",
-      label: "Supervisor",
+      label: isHo ? "Branch compliance" : "Supervisor",
       icon: "supervisor" as const,
       show: hasPermission(user.role, Permission.DASHBOARD_SUPERVISOR),
+    },
+    {
+      href: "/eod/oversight",
+      label: "EOD oversight",
+      icon: "eod" as const,
+      show:
+        isHo && hasPermission(user.role, Permission.EOD_VIEW_ALL),
     },
     {
       href: "/eod",
@@ -69,13 +93,13 @@ export function AppSidebar({ user, branchLabel }: Props) {
     },
     {
       href: "/directives",
-      label: "Directives",
+      label: "Knowledge",
       icon: "directives" as const,
       show: hasPermission(user.role, Permission.DIRECTIVE_VIEW),
     },
     {
       href: "/tickets",
-      label: "Service desk",
+      label: "Service ops",
       icon: "tickets" as const,
       show:
         hasPermission(user.role, Permission.TICKET_VIEW_BRANCH) ||
@@ -88,6 +112,12 @@ export function AppSidebar({ user, branchLabel }: Props) {
       show:
         hasPermission(user.role, Permission.PILOT_VIEW) ||
         hasPermission(user.role, Permission.PILOT_FEEDBACK_CREATE),
+    },
+    {
+      href: "/security",
+      label: "Security",
+      icon: "audit" as const,
+      show: hasPermission(user.role, Permission.SECURITY_VIEW),
     },
     {
       href: "/audit",
@@ -112,10 +142,7 @@ export function AppSidebar({ user, branchLabel }: Props) {
   return (
     <aside className="app-sidebar">
       <div className="app-sidebar-inner">
-        <Link
-          href={items[0]?.href ?? "/dashboard"}
-          className="app-sidebar-brand"
-        >
+        <Link href={homeHref} className="app-sidebar-brand">
           <MaatiiLinkLogo height={34} />
         </Link>
 
@@ -144,7 +171,7 @@ export function AppSidebar({ user, branchLabel }: Props) {
               {user.name}
             </p>
             <p className="truncate text-xs text-[var(--muted-foreground)]">
-              {user.role.replace(/_/g, " ")}
+              {roleDisplayName(user.role)}
               {branchLabel ? ` · ${branchLabel}` : ""}
             </p>
           </div>

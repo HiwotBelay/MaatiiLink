@@ -8,6 +8,7 @@ export type SessionPayload = {
   name: string;
   role: Role;
   branchId: string | null;
+  sessionId: string;
 };
 
 function getSecret(): Uint8Array {
@@ -25,6 +26,7 @@ export async function createSessionToken(payload: SessionPayload): Promise<strin
     name: payload.name,
     role: payload.role,
     branchId: payload.branchId ?? "",
+    sid: payload.sessionId,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(payload.sub)
@@ -45,11 +47,14 @@ export async function verifySessionToken(
     const name = payload.name;
     const role = payload.role;
     const branchId = payload.branchId;
+    const sessionId = payload.sid;
 
     if (
       typeof email !== "string" ||
       typeof name !== "string" ||
-      typeof role !== "string"
+      typeof role !== "string" ||
+      typeof sessionId !== "string" ||
+      !sessionId
     ) {
       return null;
     }
@@ -65,6 +70,7 @@ export async function verifySessionToken(
       name,
       role: role as Role,
       branchId: normalizedBranchId,
+      sessionId,
     };
   } catch {
     return null;

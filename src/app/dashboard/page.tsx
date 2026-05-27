@@ -1,23 +1,19 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, Home } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { StatCard } from "@/components/layout/StatCard";
-import { getServerSession } from "@/lib/auth/server";
-import { defaultRouteForRole } from "@/lib/rbac";
+import { BranchDashboard } from "@/components/dashboard/BranchDashboard";
+import { getServerSession, redirectToLogin } from "@/lib/auth/server";
+import { defaultRouteForRole, hasPermission, Permission } from "@/lib/rbac";
 import { getTodayEod } from "@/lib/eod/service";
 import { countOpenIncidentsForBranch } from "@/lib/incident/service";
 import { countOverdueAcksForBranch } from "@/lib/directive/service";
 import { countOpenTicketsForBranch } from "@/lib/ticket/service";
 import { prisma } from "@/lib/prisma";
-import { getAddisDateString } from "@/lib/eod/constants";
-
 export default async function DashboardPage() {
   const session = await getServerSession();
-  if (!session) redirect("/login");
+  if (!session) redirectToLogin("invalid_session");
 
-  if (["SUPERVISOR", "HO_ADMIN", "AUDITOR"].includes(session.role)) {
+  if (hasPermission(session.role, Permission.DASHBOARD_SUPERVISOR)) {
     redirect(defaultRouteForRole(session.role));
   }
 
@@ -43,38 +39,15 @@ export default async function DashboardPage() {
 
   const eodStatus = !todayEod
     ? { label: "Not started", tone: "danger" as const }
-    : todayEod.status === "DRAFT"
-      ? { label: "Draft", tone: "warning" as const }
+    : todayEod.status === "PENDING"
+      ? { label: "Pending", tone: "warning" as const }
       : todayEod.status === "SUBMITTED"
         ? { label: "Submitted", tone: "default" as const }
-        : { label: "Locked", tone: "success" as const };
-
-  const modules = [
-    {
-      title: "EOD today",
-      value: eodStatus.label,
-      tone: eodStatus.tone,
-      href: "/eod",
-    },
-    {
-      title: "Open incidents",
-      value: String(openIncidents),
-      tone: openIncidents > 0 ? ("warning" as const) : ("success" as const),
-      href: "/incidents",
-    },
-    {
-      title: "Overdue directives",
-      value: String(overdueDirectives),
-      tone: overdueDirectives > 0 ? ("danger" as const) : ("success" as const),
-      href: "/directives",
-    },
-    {
-      title: "Open tickets",
-      value: String(openTickets),
-      tone: openTickets > 0 ? ("warning" as const) : ("default" as const),
-      href: "/tickets",
-    },
-  ];
+        : todayEod.status === "LATE"
+          ? { label: "Late", tone: "warning" as const }
+          : todayEod.status === "REVIEWED"
+            ? { label: "Reviewed", tone: "success" as const }
+            : { label: todayEod.status, tone: "default" as const };
 
   const branchLabel = branch
     ? `${branch.name} (${branch.branchCode})`
@@ -82,32 +55,15 @@ export default async function DashboardPage() {
 
   return (
     <AppShell user={session} branchLabel={branchLabel}>
-      <PageHeader
-        title="Dashboard"
-        description={`${getAddisDateString()} · ${branch?.name ?? "Branch"}`}
-        actions={
-          <Link href="/" className="btn-secondary px-3 py-2 text-sm">
-            <Home className="h-4 w-4" />
-            Back to home
-          </Link>
-        }
-      />
-
-      <section className="dashboard-stat-grid">
-        {modules.map((m) => (
-          <Link key={m.href} href={m.href} className="dashboard-stat-link">
-            <StatCard label={m.title} value={m.value} tone={m.tone} />
-            <span className="dashboard-stat-arrow">
-              Open <ArrowRight className="h-3.5 w-3.5" />
-            </span>
-          </Link>
-        ))}
-      </section>
-
       {branch && (
-        <p className="mt-6 text-sm text-[var(--muted-foreground)]">
-          {branch.isSmartBranch ? "Smart Branch" : "Branch"} · {branch.district ?? "—"}
-        </p>
+        <BranchDashboard
+          user={session}
+          branch={branch}
+          eodStatus={eodStatus}
+          openIncidents={openIncidents}
+          overdueDirectives={overdueDirectives}
+          openTickets={openTickets}
+        />
       )}
     </AppShell>
   );

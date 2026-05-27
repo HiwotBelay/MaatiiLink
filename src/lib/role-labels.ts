@@ -2,16 +2,22 @@ import type { Role } from "@prisma/client";
 
 export function roleDisplayName(role: Role): string {
   switch (role) {
-    case "HO_ADMIN":
-      return "Admin";
-    case "BRANCH_MANAGER":
-      return "Manager";
     case "BRANCH_STAFF":
-      return "Staff";
-    case "SUPERVISOR":
-      return "Supervisor";
-    case "AUDITOR":
+      return "Branch Staff";
+    case "BRANCH_MANAGER":
+      return "Branch Manager";
+    case "REGIONAL_SUPERVISOR":
+      return "Regional Supervisor";
+    case "HO_OPERATIONS":
+      return "HO Operations";
+    case "COMPLIANCE_OFFICER":
+      return "Compliance Officer";
+    case "IT_SUPPORT":
+      return "IT Support";
+    case "AUDITOR_READ_ONLY":
       return "Auditor";
+    case "SUPER_ADMIN":
+      return "Super Admin";
     default: {
       const _exhaustive: never = role;
       return _exhaustive;
@@ -21,16 +27,22 @@ export function roleDisplayName(role: Role): string {
 
 export function roleSubtitle(role: Role): string {
   switch (role) {
-    case "HO_ADMIN":
-      return "System Administrator";
-    case "BRANCH_MANAGER":
-      return "Branch Manager";
     case "BRANCH_STAFF":
       return "Branch Operations";
-    case "SUPERVISOR":
-      return "District / Regional Supervisor";
-    case "AUDITOR":
-      return "Internal Audit";
+    case "BRANCH_MANAGER":
+      return "Branch Manager";
+    case "REGIONAL_SUPERVISOR":
+      return "Regional / District Supervisor";
+    case "HO_OPERATIONS":
+      return "Head Office Operations";
+    case "COMPLIANCE_OFFICER":
+      return "Compliance & Risk";
+    case "IT_SUPPORT":
+      return "Technology Operations";
+    case "AUDITOR_READ_ONLY":
+      return "Internal Audit (Read-only)";
+    case "SUPER_ADMIN":
+      return "Platform Administration";
     default: {
       const _exhaustive: never = role;
       return _exhaustive;

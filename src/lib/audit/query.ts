@@ -28,17 +28,26 @@ export async function queryAuditLogs(options?: {
 export function auditLogsToCsv(
   logs: Awaited<ReturnType<typeof queryAuditLogs>>,
 ): string {
-  const header = "id,timestamp,userEmail,userRole,action,entityType,entityId,metadata";
+  const header =
+    "id,timestamp,userEmail,userRole,module,action,entityType,entityId,branchId,previousValue,newValue,metadata";
   const rows = logs.map((l) => {
     const meta = l.metadata ? JSON.stringify(l.metadata).replace(/"/g, '""') : "";
+    const prev = l.previousValue
+      ? JSON.stringify(l.previousValue).replace(/"/g, '""')
+      : "";
+    const next = l.newValue ? JSON.stringify(l.newValue).replace(/"/g, '""') : "";
     return [
       l.id,
       l.createdAt.toISOString(),
       l.user?.email ?? "",
       l.user?.role ?? "",
+      l.module,
       l.action,
       l.entityType,
       l.entityId ?? "",
+      l.branchId ?? "",
+      `"${prev}"`,
+      `"${next}"`,
       `"${meta}"`,
     ].join(",");
   });

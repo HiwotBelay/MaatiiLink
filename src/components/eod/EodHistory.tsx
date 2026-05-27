@@ -1,44 +1,52 @@
 import Link from "next/link";
+import { EOD_STATUS_LABELS } from "@/lib/eod/status";
+import type { EodStatus } from "@prisma/client";
 
 type Row = {
   id: string;
   reportDate: string;
   status: string;
   submittedAt: string | null;
+  complianceScore?: number | null;
 };
 
 export function EodHistory({ reports }: { reports: Row[] }) {
   if (reports.length === 0) {
-    return <p className="text-sm text-slate-500">No reports in the last 30 days.</p>;
+    return (
+      <p className="text-sm text-[var(--muted-foreground)]">No reports in this period.</p>
+    );
   }
 
   return (
-    <div className="polished-card overflow-hidden rounded-[1.5rem]">
-      <table className="w-full text-left text-sm">
-        <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
+    <div className="eod-history-table-wrap">
+      <table className="eod-history-table">
+        <thead>
           <tr>
-            <th className="px-4 py-3">Date</th>
-            <th className="px-4 py-3">Status</th>
-            <th className="px-4 py-3">Submitted</th>
-            <th className="px-4 py-3" />
+            <th>Date</th>
+            <th>Status</th>
+            <th>Score</th>
+            <th>Submitted</th>
+            <th />
           </tr>
         </thead>
         <tbody>
           {reports.map((r) => (
-            <tr key={r.id} className="border-b border-slate-100 last:border-0">
-              <td className="px-4 py-3 font-medium">{r.reportDate}</td>
-              <td className="px-4 py-3">{r.status}</td>
-              <td className="px-4 py-3 text-slate-600">
+            <tr key={r.id}>
+              <td className="font-medium">{r.reportDate}</td>
+              <td>
+                <span className={`eod-status-badge eod-status-${r.status.toLowerCase()}`}>
+                  {EOD_STATUS_LABELS[r.status as EodStatus] ?? r.status}
+                </span>
+              </td>
+              <td>{r.complianceScore != null ? `${r.complianceScore}%` : "—"}</td>
+              <td className="text-[var(--muted-foreground)]">
                 {r.submittedAt
-                  ? new Date(r.submittedAt).toLocaleString("en-ET", {
-                      dateStyle: "short",
-                      timeStyle: "short",
-                    })
+                  ? new Date(r.submittedAt).toLocaleString()
                   : "—"}
               </td>
-              <td className="px-4 py-3 text-right">
-                <Link href={`/eod?date=${r.reportDate}`} className="text-[#00529b] hover:underline">
-                  View
+              <td>
+                <Link href={`/eod?date=${r.reportDate}`} className="eod-history-link">
+                  Open
                 </Link>
               </td>
             </tr>

@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { Permission } from "@/lib/rbac";
 import { requireApiUser } from "@/lib/api/with-auth";
 import { jsonError, jsonOk } from "@/lib/api/http";
-import { lockEod, EodError } from "@/lib/eod/service";
+import { reviewEod, EodError } from "@/lib/eod/service";
 import { serializeEod } from "@/lib/eod/serialize";
 
 type Params = { params: Promise<{ id: string }> };
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest, { params }: Params) {
   const { id } = await params;
 
   try {
-    const report = await lockEod(user, id);
+    const report = await reviewEod(user, id);
     return jsonOk({ ok: true, report: serializeEod(report) });
   } catch (e) {
     if (e instanceof EodError) {

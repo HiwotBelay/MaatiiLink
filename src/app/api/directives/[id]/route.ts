@@ -18,7 +18,10 @@ export async function GET(request: NextRequest, { params }: Params) {
     if (!directive) return jsonError("Not found", 404);
     return jsonOk({
       ok: true,
-      directive: serializeDirective(directive, { branchId: user.branchId }),
+      directive: serializeDirective(directive, {
+        branchId: user.branchId,
+        userId: user.id,
+      }),
     });
   } catch (e) {
     if (e instanceof DirectiveError) return jsonError(e.message, 403);

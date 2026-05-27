@@ -45,7 +45,8 @@ Same dev test users as local (after seed on staging DB). See `docs/phase2/STAGIN
 
 | Email | Role | Lands on |
 |-------|------|----------|
-| admin@maatiilink.local | HO_ADMIN | /supervisor |
+| admin@maatiilink.local | SUPER_ADMIN | /admin |
+| hoops@maatiilink.local | HO_OPERATIONS | /ho (Head Office) |
 | manager@maatiilink.local | BRANCH_MANAGER | /dashboard |
 | supervisor@maatiilink.local | SUPERVISOR | /supervisor |
 | auditor@maatiilink.local | AUDITOR | /supervisor (read-only) |
@@ -61,6 +62,13 @@ Password for all: `ChangeMe123!` (see `prisma/seed.ts` — change before pilot)
 - `/supervisor` — supervisor / HO / auditor
 - `/api/auth/login`, `/logout`, `/me`
 - Audit log on LOGIN / LOGOUT
+
+## Knowledge / directives
+
+- **Browse:** `/directives` — search, 8 operational areas, quick lookup, read & acknowledge  
+- **Publish (HO):** `/directives/new` as `hoops@maatiilink.local`  
+- **Seed content:** `npm run db:seed` loads 14 pilot HO procedures (`HO-2026-xxx`) — replace with real bank circulars via Publish  
+- **Guide:** `docs/DIRECTIVES_CONTENT.md`
 
 ## Sprint 2 (EOD) — done
 

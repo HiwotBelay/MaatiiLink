@@ -30,9 +30,12 @@ type Props = {
 const ROLES: Role[] = [
   "BRANCH_STAFF",
   "BRANCH_MANAGER",
-  "SUPERVISOR",
-  "HO_ADMIN",
-  "AUDITOR",
+  "REGIONAL_SUPERVISOR",
+  "HO_OPERATIONS",
+  "COMPLIANCE_OFFICER",
+  "IT_SUPPORT",
+  "AUDITOR_READ_ONLY",
+  "SUPER_ADMIN",
 ];
 
 export function AdminConsole({ initialUsers, initialBranches }: Props) {
